@@ -1,0 +1,9 @@
+{
+    "url": "https://justluthra.github.io/justluthra/XSS.yaml",
+    "urls": [
+        {
+            "url": "https://justluthra.github.io/justluthra/XSS.yaml",
+            "name": "Foo"
+        }
+    ]
+}

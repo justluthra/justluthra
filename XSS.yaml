@@ -20,7 +20,7 @@ paths:
         '200':
           description: No response was specified
       tags:
-        - LUTHRAX-H1
+        - Cryptographer-H1
       operationId: findAccounts
       summary: Finds all accounts
   '/hack/hachid/{id}':

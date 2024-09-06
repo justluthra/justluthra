@@ -14,7 +14,7 @@ consumes:
 security:
   - basicAuth: []
 paths:
-  /M0X0101:
+  /Cryptographer:
     get:
       responses:
         '200':

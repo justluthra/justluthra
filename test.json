@@ -1,8 +1,8 @@
 {
-    "url": "https://justluthra.github.io/justluthra/XSS.yaml",
+    "url": "https://justluthra.github.io/justluthra/xss1.yaml",
     "urls": [
         {
-            "url": "https://justluthra.github.io/justluthra/XSS.yaml",
+            "url": "https://justluthra.github.io/justluthra/xss1.yaml",
             "name": "Foo"
         }
     ]

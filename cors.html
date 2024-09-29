@@ -17,7 +17,7 @@ function cors() {
       document.getElementById("demo").innerHTML = alert(this.responseText);
     }
   };
-  xhttp.open("GET", "https://target", true);
+  xhttp.open("GET", "https://apim.oz.tnd.bsb-net.com/api/am/devportal/v2/apis/bc01f525-6b89-495a-8767-022a8a7ecc90/ratings", true);
   xhttp.withCredentials = true;
   xhttp.send();
 }

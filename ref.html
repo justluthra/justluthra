@@ -1,17 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Referrer-XSS Test</title>
-    <script>
-        function redirect() {
-            window.location.href = 'https://sfgcz24ajmtqneho2mqc-origin.forwardplatinum.iagcargo.com/en/language/switch/es';
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirect Loop</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            text-align: center;
+            margin: 0;
         }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            color: #333;
+        }
+        .message {
+            font-size: 18px;
+            margin: 20px 0;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+    <script>
+        let currentURLIndex = 0;
+        const urls = [
+            'https://sfgcz24ajmtqneho2mqc-origin.forwardplatinum.iagcargo.com/en/language/switch/es',
+            'https://justluthra.github.io/justluthra/ref.html'
+        ];
+
+        function loopRedirect() {
+            // Redirect to the current URL
+            window.location.href = urls[currentURLIndex];
+            // Update the index to switch between URLs
+            currentURLIndex = (currentURLIndex + 1) % urls.length; // Loop back to the first URL after reaching the last
+        }
+
+        // Call loopRedirect every 5 seconds (5000 milliseconds)
+        setInterval(loopRedirect, 5000);
     </script>
 </head>
 <body>
-    <h1>Referrer-XSS Test</h1>
-    <p>Click the button below to be redirected:</p>
-    <button onclick="redirect()">Redirect to Target Page</button>
-    <p>If you are not redirected, you can also click <a href="https://sfgcz24ajmtqneho2mqc-origin.forwardplatinum.iagcargo.com/en/language/switch/es">here</a>.</p>
+    <div class="container">
+        <h1>Redirect Loop</h1>
+        <div class="message">You will be redirected between two pages every 5 seconds...</div>
+        <p>If you want to manually redirect, click the button below:</p>
+        <button onclick="loopRedirect()">Redirect Now</button>
+        <p>For more information, you can also click <a href="https://justluthra.github.io/justluthra/ref.html">here</a>.</p>
+    </div>
 </body>
 </html>

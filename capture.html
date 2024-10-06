@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Cookie Captured</title>
+</head>
+<body>
+    <script>
+        var urlParams = new URLSearchParams(window.location.search);
+        var cookie = urlParams.get('cookie');
+        console.log('Captured Cookie: ', cookie);
+        // You can also store this data or process it further on your server.
+    </script>
+</body>
+</html>

@@ -4,11 +4,12 @@
     <title>Cookie Captured</title>
 </head>
 <body>
+    <h1>Cookie Captured!</h1>
     <script>
         var urlParams = new URLSearchParams(window.location.search);
         var cookie = urlParams.get('cookie');
         console.log('Captured Cookie: ', cookie);
-        // You can also store this data or process it further on your server.
+        // Optionally, you can send this data to a server or log it elsewhere.
     </script>
 </body>
 </html>

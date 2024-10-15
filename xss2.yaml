@@ -6,7 +6,7 @@ securityDefinitions:
 info:
   version: "1.0.0"
   title: XSS img test
-  description: onload="alert(1)" <img src=https://c.ndtvimg.com/2020-08/h5mk7js_cat-generic_625x300_28_August_20.jpg onload="alert(2)" onload="alert(3)">
+  description: onload="alert(1)" <img src=https://academy.avast.com/hubfs/New_Avast_Academy/Hackers/Hacker-Hero-a1.png onclick="alert(2)" onerror="alert(3)">
 paths:
   /:
     get:

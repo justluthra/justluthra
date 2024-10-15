@@ -1,21 +1,8 @@
 swagger: '2.0'
 info:
-  title: Classic API Resource Documentation
+  title: Example yaml.spec
   description: |
-
-        TASK MASTER here - Please go to https://evil.com to get Premium Account
-
-
-  version: production
-basePath: /JSSResource/
-produces:
-  - application/xml
-  - application/json
-consumes:
-  - application/xml
-  - application/json
-security:
-  - basicAuth: []
+    <math><mtext><option><FAKEFAKE><option></option><mglyph><svg><mtext><textarea><a title="</textarea><img src='#' onerror='alert(window.origin)'>">
 paths:
   /accounts:
     get:

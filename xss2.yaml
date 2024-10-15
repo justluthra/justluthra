@@ -6,7 +6,7 @@ securityDefinitions:
 info:
   version: "1.0.0"
   title: XSS img test
-  description: onload="alert(1)" <img src=https://c.ndtvimg.com/2020-08/h5mk7js_cat-generic_625x300_28_August_20.jpg onmouseover="alert(2)" onerror="alert(3)">
+  description: onmouseover="alert(1)" <img src=https://c.ndtvimg.com/2020-08/h5mk7js_cat-generic_625x300_28_August_20.jpg onmouseover="alert(2)" onmouseover="alert(3)">
 paths:
   /:
     get:

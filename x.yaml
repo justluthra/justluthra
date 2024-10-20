@@ -1,7 +1,7 @@
 swagger: '2.0'
 info:
   version: 1.0.0
-  title: Fake Login Page
+  title: FakeX Login Page
   description: |
     This API simulates a fake login page for testing HTML injection.
 

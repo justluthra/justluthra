@@ -10,11 +10,11 @@ info:
       </div>
       <div>
         <label for="username">Username</label> 
-        <input size="20" name="username" id="username" type="text"> 
+        <input size="20" name="username" id="username" type="text" autocomplete="username"> 
       </div> 
       <div> 
         <label for="password">Password</label> 
-        <input size="20" name="password" id="password" type="text"> <!-- Password visible -->
+        <input size="20" name="password" id="password" type="text" autocomplete="current-password"> <!-- Password visible -->
       </div> 
       <div> 
         <button type="submit" onclick="submitForm()">Login</button> 

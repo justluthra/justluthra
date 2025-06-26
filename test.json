@@ -1,0 +1,3 @@
+{
+  "RequestInterceptorFunction": "function() { alert(document.domain) }"
+}

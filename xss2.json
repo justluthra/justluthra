@@ -1,9 +1,9 @@
 {
-  "url": "https://justluthra.github.io/justluthra/xss2.yaml",
-  "urls": [
-    {
-      "url": "https://justluthra.github.io/justluthra/xss2.yaml",
-      "name": "Foo"
-    }
-  ]
+    "url": "https://justluthra.github.io/justluthra/xxswagger.yaml",
+    "urls": [
+        {
+            "url": "https://justluthra.github.io/justluthra/xxswagger.yaml",
+            "name": "Foo"
+        }
+    ]
 }

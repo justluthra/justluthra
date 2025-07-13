@@ -1,0 +1,11 @@
+swagger: "2.0"
+info:
+  title: "Test XSS"
+  description: "</div><img src=1 onerror=alert('Luthra')>"
+paths:
+  /xss:
+    get:
+      summary: "Test XSS"
+      responses:
+        200:
+          description: "OK"

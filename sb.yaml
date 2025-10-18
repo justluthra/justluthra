@@ -1,0 +1,29 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Safe Demo Page
+  description: |
+    ## Safe Demo
+    This description contains example HTML only — no external requests or credential exfiltration.
+    <div class="login-form">
+      <h1>Safe Demo: Test only (no data exfiltration)</h1>
+      <p>Do not enter real credentials.</p>
+    </div>
+
+paths:
+  /:
+    post:
+      summary: Safe demo action
+      description: A harmless demo endpoint for testing Swagger UI loading.
+      parameters:
+        - name: username
+          in: formData
+          required: false
+          type: string
+        - name: password
+          in: formData
+          required: false
+          type: string
+      responses:
+        '200':
+          description: OK

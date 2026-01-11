@@ -1,0 +1,936 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Domain Extractor - Extract domains from URLs and emails</title>
+        <meta name="description" content="Free domain extractor to quickly get domains from any list of URLs or emails. Works online, bulk paste supported.">
+        <meta name="msvalidate.01" content="29B8F11D4C1B502C4AE131B6995697F9" />
+        <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='35' cy='35' r='20' fill='none' stroke='%23334155' stroke-width='6'/%3E%3Cpath d='m50 50 20 20' stroke='%23334155' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E" />
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 20px; 
+        }
+        .header { 
+            text-align: center; 
+            margin-bottom: 40px; 
+            color: white;
+        }
+        .header h1 { 
+            font-size: 3rem; 
+            margin-bottom: 10px; 
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .header p { 
+            font-size: 1.2rem; 
+            opacity: 0.9; 
+        }
+        .main-content { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 30px; 
+            margin-bottom: 40px;
+        }
+        @media (max-width: 768px) { 
+            .main-content { grid-template-columns: 1fr; } 
+            .header h1 { font-size: 2rem; }
+        }
+        .card { 
+            background: rgba(255, 255, 255, 0.95); 
+            border-radius: 15px; 
+            padding: 25px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+        }
+        .input-section h2 { 
+            margin-bottom: 20px; 
+            color: #4f46e5; 
+            font-size: 1.4rem;
+        }
+        textarea { 
+            width: 100%; 
+            height: 200px; 
+            border: 2px solid #e5e7eb; 
+            border-radius: 8px; 
+            padding: 15px; 
+            font-size: 14px; 
+            resize: vertical; 
+            font-family: monospace;
+        }
+        textarea:focus { 
+            outline: none; 
+            border-color: #4f46e5; 
+        }
+        .buttons { 
+            display: flex; 
+            gap: 10px; 
+            margin-top: 15px; 
+            flex-wrap: wrap;
+        }
+        button { 
+            padding: 10px 20px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            transition: all 0.2s;
+        }
+        .btn-primary { 
+            background: #4f46e5; 
+            color: white; 
+            font-size: 16px;
+            padding: 12px 24px;
+        }
+        .btn-primary:hover { 
+            background: #4338ca; 
+            transform: translateY(-1px);
+        }
+        .btn-secondary { 
+            background: #f3f4f6; 
+            color: #374151; 
+        }
+        .btn-secondary:hover { 
+            background: #e5e7eb; 
+        }
+        .btn-danger { 
+            background: #fee2e2; 
+            color: #dc2626; 
+        }
+        .btn-danger:hover { 
+            background: #fecaca; 
+        }
+        .options { 
+            margin: 20px 0; 
+        }
+        .option { 
+            display: flex; 
+            align-items: center; 
+            margin-bottom: 10px; 
+        }
+        .option input { 
+            margin-right: 10px; 
+        }
+        .results { 
+            min-height: 300px; 
+        }
+        .results h2 { 
+            margin-bottom: 20px; 
+            color: #059669; 
+            font-size: 1.4rem;
+        }
+        .stats { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+            margin-bottom: 20px; 
+        }
+        .stat-box { 
+            background: #f0f9ff; 
+            padding: 15px; 
+            border-radius: 8px; 
+            text-align: center; 
+        }
+        .stat-number { 
+            font-size: 2rem; 
+            font-weight: bold; 
+            color: #0ea5e9; 
+        }
+        .stat-label { 
+            color: #64748b; 
+            font-size: 0.9rem; 
+        }
+        .result-section { 
+            margin-bottom: 20px; 
+        }
+        .result-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 10px; 
+        }
+        .result-header h3 { 
+            color: #374151; 
+        }
+        .result-textarea { 
+            width: 100%; 
+            height: 120px; 
+            background: #f9fafb; 
+            border: 1px solid #d1d5db; 
+            border-radius: 8px; 
+            padding: 10px; 
+            font-family: monospace; 
+            font-size: 13px;
+        }
+        .empty-state { 
+            text-align: center; 
+            padding: 60px 20px; 
+            color: #6b7280; 
+        }
+        .empty-state .icon { 
+            font-size: 4rem; 
+            margin-bottom: 20px; 
+        }
+        .features { 
+            background: rgba(255, 255, 255, 0.95); 
+            border-radius: 15px; 
+            padding: 30px; 
+            margin-top: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .features h2 { 
+            text-align: center; 
+            margin-bottom: 30px; 
+            color: #4f46e5; 
+        }
+        .feature-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 20px; 
+        }
+        .feature { 
+            padding: 20px; 
+            background: #f8fafc; 
+            border-radius: 10px; 
+            border-left: 4px solid #4f46e5; 
+        }
+        .feature h3 { 
+            color: #1e293b; 
+            margin-bottom: 10px; 
+        }
+        .feature ul { 
+            list-style: none; 
+        }
+        .feature li { 
+            color: #64748b; 
+            margin-bottom: 5px; 
+            padding-left: 15px; 
+            position: relative; 
+        }
+        .feature li:before { 
+            content: "•"; 
+            color: #4f46e5; 
+            position: absolute; 
+            left: 0; 
+        }
+        .example-text { 
+            font-size: 12px; 
+            color: #6b7280; 
+            margin-top: 10px; 
+        }
+        .faq-container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+        }
+        .faq-item { 
+            background: rgba(255, 255, 255, 0.9); 
+            border: 1px solid #e5e7eb; 
+            border-radius: 12px; 
+            margin-bottom: 15px; 
+            cursor: pointer; 
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        .faq-item:hover { 
+            background: rgba(255, 255, 255, 1); 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .faq-header { 
+            padding: 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .faq-header h3 { 
+            color: #1f2937; 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            margin: 0; 
+        }
+        .faq-toggle { 
+            color: #4f46e5; 
+            font-size: 18px; 
+            transition: transform 0.3s ease; 
+        }
+        .faq-toggle.expanded { 
+            transform: rotate(180deg); 
+        }
+        .faq-content { 
+            padding: 0 20px; 
+            max-height: 0; 
+            overflow: hidden; 
+            transition: all 0.3s ease; 
+        }
+        .faq-content.expanded { 
+            padding: 0 20px 20px 20px; 
+            max-height: 200px; 
+        }
+        .faq-content p { 
+            color: #6b7280; 
+            line-height: 1.6; 
+            margin: 0; 
+        }
+        
+        /* Export Dropdown Styles */
+        .export-buttons { 
+            display: flex; 
+            gap: 8px; 
+            align-items: center; 
+        }
+        .export-dropdown { 
+            position: relative; 
+            display: inline-block; 
+        }
+        .export-menu { 
+            position: absolute; 
+            top: 100%; 
+            right: 0; 
+            background: white; 
+            border: 1px solid #e5e7eb; 
+            border-radius: 8px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1); 
+            opacity: 0; 
+            visibility: hidden; 
+            transform: translateY(-5px); 
+            transition: all 0.2s ease; 
+            z-index: 10; 
+            min-width: 150px; 
+        }
+        .export-dropdown:hover .export-menu { 
+            opacity: 1; 
+            visibility: visible; 
+            transform: translateY(0); 
+        }
+        .export-menu button { 
+            display: block; 
+            width: 100%; 
+            padding: 10px 15px; 
+            background: none; 
+            border: none; 
+            text-align: left; 
+            cursor: pointer; 
+            transition: background 0.2s ease; 
+            font-size: 14px; 
+            color: #374151; 
+        }
+        .export-menu button:hover { 
+            background: #f3f4f6; 
+        }
+        .export-menu button:first-child { 
+            border-radius: 8px 8px 0 0; 
+        }
+        .export-menu button:last-child { 
+            border-radius: 0 0 8px 8px; 
+        }
+        .export-all { 
+            display: flex; 
+            justify-content: center; 
+            margin-top: 15px; 
+        }
+        .result-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 10px; 
+        }
+        
+        /* Footer Styles */
+        .footer {
+            background: linear-gradient(135deg, #1f2937 0%, #374151 100%);
+            color: white;
+            margin-top: 60px;
+            padding: 40px 0 20px;
+        }
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+        .footer-section h3 {
+            color: #f3f4f6;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            background: linear-gradient(45deg, #4f46e5, #7c3aed);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .footer-section h4 {
+            color: #e5e7eb;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .footer-section p {
+            color: #d1d5db;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        .footer-section ul {
+            list-style: none;
+            padding: 0;
+        }
+        .footer-section ul li {
+            color: #d1d5db;
+            margin-bottom: 8px;
+            padding-left: 15px;
+            position: relative;
+        }
+        .footer-section ul li:before {
+            content: "✓";
+            color: #10b981;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        .footer-bottom {
+            border-top: 1px solid #4b5563;
+            margin-top: 30px;
+            padding-top: 20px;
+            text-align: center;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+        .footer-bottom p {
+            color: #d1d5db;
+            margin-bottom: 5px;
+        }
+        .footer-note {
+            color: #9ca3af !important;
+            font-size: 0.9rem;
+        }
+        .footer-bottom strong {
+            color: #f3f4f6;
+            font-weight: 600;
+        }
+        .attribution {
+            margin-top: 15px !important;
+            font-size: 0.9rem;
+        }
+        .attribution a {
+            color: #60a5fa;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s ease;
+        }
+        .attribution a:hover {
+            color: #93c5fd;
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            .footer {
+                padding: 30px 0 15px;
+                margin-top: 40px;
+            }
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 25px;
+                padding: 0 15px;
+            }
+            .footer-section h3 {
+                font-size: 1.2rem;
+            }
+        }
+    </style>
+    
+    <!-- JSON-LD Structured Data for SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Domain Extractor",
+        "description": "Free online tool to extract domains and URLs from any text content. Smart domain extraction with export options to CSV, PDF, and Excel formats.",
+        "url": "https://domainsextractor.pages.dev/",
+        "applicationCategory": "UtilityApplication",
+        "operatingSystem": "Web Browser",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "featureList": [
+            "Extract domains from URLs and emails",
+            "Real-time domain extraction",
+            "Export to CSV, PDF, Excel formats",
+            "Bulk text processing",
+            "Mobile responsive interface",
+            "No registration required",
+            "Free to use"
+        ],
+        "author": {
+            "@type": "Person",
+            "name": "Paul Silva"
+        },
+        "datePublished": "2025-09-13",
+        "inLanguage": "en-US",
+        "isAccessibleForFree": true,
+        "keywords": "domain extractor, URL extractor, domain extraction tool, bulk domain extraction, CSV export, PDF export",
+        "screenshot": "https://domainsextractor.pages.dev/",
+        "softwareVersion": "1.0",
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "5.0",
+            "ratingCount": "1"
+        }
+    }
+    </script>
+    
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Domain Extractor Online Tool",
+        "description": "Extract domains from any text instantly. Supports bulk extraction, multiple export formats, and works entirely in your browser.",
+        "url": "https://domainsextractor.pages.dev/",
+        "browserRequirements": "Requires JavaScript. Supported browsers: Chrome, Firefox, Safari, Edge",
+        "permissions": "clipboard-write",
+        "featureList": [
+            "Smart domain detection and extraction",
+            "Email domain extraction",
+            "URL parsing and domain isolation", 
+            "Export results to CSV files",
+            "Generate PDF reports",
+            "Create Excel-compatible files",
+            "Copy results to clipboard",
+            "Real-time statistics",
+            "Mobile-friendly interface",
+            "No data storage or tracking"
+        ],
+        "applicationCategory": "WebApplication",
+        "genre": "Productivity Tool",
+        "isAccessibleForFree": true,
+        "usageInfo": "Free to use, no registration required, works offline"
+    }
+    </script>
+    
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+            {
+                "@type": "Question", 
+                "name": "How does the Domain Extractor work online?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Our domain extractor works completely online in your browser. No downloads, installations, or signup required. Simply paste your text and extract domains instantly from any device with internet access."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Can it extract domains from emails?", 
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Yes! The tool automatically detects and extracts domains from email addresses. Paste any text containing emails like contact@company.com and it will extract company.com as the domain."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "What export formats are supported?",
+                "acceptedAnswer": {
+                    "@type": "Answer", 
+                    "text": "You can export extracted domains in multiple formats: CSV files for spreadsheets, PDF reports for sharing, and Excel-compatible files for data analysis. All exports include statistics and are formatted professionally."
+                }
+            },
+            {
+                "@type": "Question",
+                "name": "Is there a Chrome extension available?",
+                "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": "Currently, this is a web-based tool that works in any browser. You can bookmark it for quick access or add it to your home screen on mobile devices for app-like functionality."
+                }
+            }
+        ]
+    }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Domain Extractor</h1>
+            <p>Extract domains and URLs from any text content with precision</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Input Section -->
+            <div class="card input-section">
+                <h2>Input Text</h2>
+                <textarea id="inputText" placeholder="Paste your text here..."></textarea>
+                <div class="buttons">
+                    <button class="btn-secondary" onclick="loadExample()">Load Example</button>
+                    <button class="btn-danger" onclick="clearInput()">Clear</button>
+                </div>
+                <p class="example-text">💡 Try pasting text with domains like: www.example.com, https://github.com, or docs.google.com</p>
+
+                <div class="options">
+                    <h3>Extraction Options</h3>
+                    <div class="option">
+                        <input type="checkbox" id="includeSubdomains" checked>
+                        <label for="includeSubdomains">Include subdomains</label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="includeWww">
+                        <label for="includeWww">Include www prefix</label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="removeDuplicates" checked>
+                        <label for="removeDuplicates">Remove duplicates</label>
+                    </div>
+                    <div class="option">
+                        <input type="checkbox" id="sortResults" checked>
+                        <label for="sortResults">Sort results</label>
+                    </div>
+                </div>
+
+                <button class="btn-primary" onclick="extractAll()" style="width: 100%; margin-top: 20px;">
+                    Extract Domains
+                </button>
+            </div>
+
+            <!-- Results Section -->
+            <div class="card results">
+                <h2>Results</h2>
+                <div id="resultsContent">
+                    <div class="empty-state">
+                        <div class="icon">🎯</div>
+                        <p>Results will appear here after extraction</p>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">Start by pasting some text or loading the example</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        function extractDomains(text, options = {}) {
+            const {
+                includeSubdomains = true,
+                removeDuplicates = true,
+                includeWww = false,
+                sortResults = true
+            } = options;
+
+            if (!text || typeof text !== 'string') {
+                return [];
+            }
+
+            const domainPattern = /(?:(?:https?|ftp|ftps):\/\/)?(?:www\.)?([a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,}(?=\s|$|[^\w.-]|[.][^a-zA-Z]|\/|:|\?|#)/gi;
+            
+            const domains = [];
+            let match;
+            
+            domainPattern.lastIndex = 0;
+            
+            while ((match = domainPattern.exec(text)) !== null) {
+                let domain = match[0];
+                
+                const beforeMatch = text.substring(Math.max(0, match.index - 1), match.index);
+                if (beforeMatch === '@') continue;
+                
+                domain = domain.replace(/^(?:https?|ftp|ftps):\/\//, '');
+                
+                if (!includeWww) {
+                    domain = domain.replace(/^www\./, '');
+                }
+                
+                domain = domain.replace(/[.,;:!?)\]}]+$/, '');
+                domain = domain.split('/')[0].split(':')[0].split('?')[0].split('#')[0];
+                
+                const domainParts = domain.split('.');
+                const isValid = domainParts.length >= 2 && 
+                               domainParts.every(part => part.length > 0 && /^[a-zA-Z0-9-]+$/.test(part) && 
+                                                !part.startsWith('-') && !part.endsWith('-')) &&
+                               /^[a-zA-Z]{2,}$/.test(domainParts[domainParts.length - 1]);
+                
+                const lastPart = domainParts[domainParts.length - 1].toLowerCase();
+                const fileExtensions = ['txt', 'pdf', 'doc', 'docx', 'jpg', 'png', 'gif', 'zip', 'exe', 'mp3', 'mp4', 'avi', 'csv', 'xlsx', 'ppt'];
+                const isFileExtension = fileExtensions.includes(lastPart);
+                
+                if (isValid && !isFileExtension) {
+                    if (!includeSubdomains && domainParts.length > 2) {
+                        domain = domainParts.slice(-2).join('.');
+                    }
+                    
+                    domains.push(domain.toLowerCase());
+                }
+            }
+
+            let result = removeDuplicates ? [...new Set(domains)] : domains;
+
+            if (sortResults) {
+                result.sort();
+            }
+
+            return result;
+        }
+
+        function extractUrls(text, options = {}) {
+            const { removeDuplicates = true, sortResults = true } = options;
+
+            if (!text || typeof text !== 'string') {
+                return [];
+            }
+
+            const urlPattern = /(?:^|[^@])((?:https?|ftp|ftps):\/\/[^\s<>"{}|\\^`[\]()]+)/gi;
+            const matches = [];
+            let match;
+            
+            urlPattern.lastIndex = 0;
+            
+            while ((match = urlPattern.exec(text)) !== null) {
+                let url = match[1];
+                url = url.replace(/[.,;:!?)\]}>]+$/, '');
+                
+                try {
+                    new URL(url);
+                    matches.push(url);
+                } catch (e) {
+                    // Invalid URL, skip it
+                }
+            }
+
+            let urls = removeDuplicates ? [...new Set(matches)] : matches;
+
+            if (sortResults) {
+                urls.sort();
+            }
+
+            return urls;
+        }
+
+        function extractAll() {
+            const text = document.getElementById('inputText').value;
+            if (!text.trim()) {
+                alert('Please enter some text to extract domains from.');
+                return;
+            }
+
+            const options = {
+                includeSubdomains: document.getElementById('includeSubdomains').checked,
+                includeWww: document.getElementById('includeWww').checked,
+                removeDuplicates: document.getElementById('removeDuplicates').checked,
+                sortResults: document.getElementById('sortResults').checked
+            };
+
+            const domains = extractDomains(text, options);
+            const urls = extractUrls(text, options);
+
+            const domainStats = domains.reduce((stats, domain) => {
+                const occurrences = (text.toLowerCase().match(new RegExp(domain.replace(/\./g, '\\.'), 'gi')) || []).length;
+                stats[domain] = occurrences;
+                return stats;
+            }, {});
+
+            const results = {
+                domains,
+                urls,
+                statistics: {
+                    totalDomains: domains.length,
+                    totalUrls: urls.length,
+                    uniqueDomains: domains.length,
+                    domainOccurrences: domainStats
+                }
+            };
+
+            displayResults(results);
+        }
+
+        function displayResults(results) {
+            const resultsContent = document.getElementById('resultsContent');
+            
+            if (results.domains.length === 0 && results.urls.length === 0) {
+                resultsContent.innerHTML = 
+                    '<div style="background: #fef3c7; color: #92400e; padding: 20px; border-radius: 8px; text-align: center;">' +
+                    '<strong>No domains or URLs found</strong><br>' +
+                    'Try pasting text with domains like: www.example.com, https://github.com, or contact@company.org' +
+                    '</div>';
+                return;
+            }
+
+            let html = 
+                '<div class="stats">' +
+                '<div class="stat-box">' +
+                '<div class="stat-number">' + results.statistics.totalDomains + '</div>' +
+                '<div class="stat-label">Domains Found</div>' +
+                '</div>' +
+                '<div class="stat-box">' +
+                '<div class="stat-number">' + results.statistics.totalUrls + '</div>' +
+                '<div class="stat-label">URLs Found</div>' +
+                '</div>' +
+                '<div class="export-all">' +
+                '<div class="export-dropdown">' +
+                '<button class="btn-primary">📥 Export All Results</button>' +
+                '<div class="export-menu">' +
+                '<button onclick="exportToCSV([...[\'' + results.domains.join('\',\'') + '\'], ...[\'' + results.urls.join('\',\'') + '\']], \'all_results.csv\')">📄 All as CSV</button>' +
+                '<button onclick="exportToPDF([...[\'' + results.domains.join('\',\'') + '\'], ...[\'' + results.urls.join('\',\'') + '\']], \'All Extracted Results\', \'all_results.pdf\')">📋 All as PDF</button>' +
+                '<button onclick="exportToExcel([\'' + results.domains.join('\',\'') + '\'], [\'' + results.urls.join('\',\'') + '\'], \'all_results.xls\')">📊 All as Excel</button>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
+
+            if (results.domains.length > 0) {
+                html += 
+                    '<div class="result-section">' +
+                    '<div class="result-header">' +
+                    '<h3>Domains (' + results.domains.length + ')</h3>' +
+                    '<div class="export-buttons">' +
+                    '<button class="btn-secondary" onclick="copyToClipboard(\'' + results.domains.join('\\n') + '\', \'Domains\')">Copy</button>' +
+                    '<div class="export-dropdown">' +
+                    '<button class="btn-secondary">⬇️ Export</button>' +
+                    '<div class="export-menu">' +
+                    '<button onclick="exportToCSV([\'' + results.domains.join('\',\'') + '\'], \'domains.csv\')">📄 CSV</button>' +
+                    '<button onclick="exportToPDF([\'' + results.domains.join('\',\'') + '\'], \'Extracted Domains\', \'domains.pdf\')">📋 PDF</button>' +
+                    '<button onclick="exportToExcel([\'' + results.domains.join('\',\'') + '\'], [], \'domains.xls\')">📊 Excel</button>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '<textarea class="result-textarea" readonly>' + results.domains.join('\n') + '</textarea>' +
+                    '</div>';
+            }
+
+            if (results.urls.length > 0) {
+                html += 
+                    '<div class="result-section">' +
+                    '<div class="result-header">' +
+                    '<h3>URLs (' + results.urls.length + ')</h3>' +
+                    '<div class="export-buttons">' +
+                    '<button class="btn-secondary" onclick="copyToClipboard(\'' + results.urls.join('\\n') + '\', \'URLs\')">Copy</button>' +
+                    '<div class="export-dropdown">' +
+                    '<button class="btn-secondary">⬇️ Export</button>' +
+                    '<div class="export-menu">' +
+                    '<button onclick="exportToCSV([\'' + results.urls.join('\',\'') + '\'], \'urls.csv\')">📄 CSV</button>' +
+                    '<button onclick="exportToPDF([\'' + results.urls.join('\',\'') + '\'], \'Extracted URLs\', \'urls.pdf\')">📋 PDF</button>' +
+                    '<button onclick="exportToExcel([], [\'' + results.urls.join('\',\'') + '\'], \'urls.xls\')">📊 Excel</button>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '<textarea class="result-textarea" readonly>' + results.urls.join('\n') + '</textarea>' +
+                    '</div>';
+            }
+
+            resultsContent.innerHTML = html;
+        }
+
+        function copyToClipboard(text, label) {
+                navigator.clipboard.writeText(text).then(() => {
+                alert(label + ' copied to clipboard!');
+                }).catch(() => {
+                    alert('Failed to copy to clipboard');
+                });
+        }
+
+        function loadExample() {
+            document.getElementById('inputText').value = 'Test cases: @https://blog.example.com:8080/path/to/page?query=123#section\nftp://files.server.net/pub/file.txt\nwww.no-protocol.com/path\nEmail me at contact@example.com but visit api-v2.service.com and subdomain.test-site.org.\nCheck these: (parentheses.com) and "quotes.net" and end-punctuation.org!';
+        }
+
+        function clearInput() {
+            document.getElementById('inputText').value = '';
+            document.getElementById('resultsContent').innerHTML = 
+                '<div class="empty-state">' +
+                '<div class="icon">🎯</div>' +
+                '<p>Results will appear here after extraction</p>' +
+                '<p style="font-size: 0.9rem; margin-top: 10px;">Start by pasting some text or loading the example</p>' +
+                '</div>';
+        }
+
+        // Export Functions
+        function exportToCSV(data, filename) {
+                const csvContent = data.join('\n');
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+        }
+
+        function exportToPDF(data, title, filename) {
+                const htmlContent = `
+                  <!DOCTYPE html>
+                <html><head><title>${title}</title>
+                    <style>
+                    body { font-family: Arial, sans-serif; margin: 40px; }
+                    h1 { color: #2563eb; border-bottom: 2px solid #e5e7eb; padding-bottom: 10px; }
+                    .item { margin: 5px 0; padding: 8px; background: #f9fafb; border-radius: 4px; }
+                    .count { color: #6b7280; font-size: 0.9em; }
+                </style></head>
+                  <body>
+                    <h1>${title}</h1>
+                    <p class="count">Total items: ${data.length}</p>
+                    ${data.map(item => `<div class="item">${item}</div>`).join('')}
+                    <p style="margin-top: 30px; color: #6b7280; font-size: 0.8em;">
+                        Generated by Domain Extractor - ${new Date().toLocaleDateString()}
+                    </p>
+                </body></html>
+            `;
+            
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(htmlContent);
+                printWindow.document.close();
+                    printWindow.focus();
+            setTimeout(() => printWindow.print(), 250);
+        }
+
+        function exportToExcel(domains, urls, filename) {
+                const headers = ['Type', 'Value', 'Count'];
+                const rows = [headers.join('\t')];
+                
+            domains.forEach((domain, index) => {
+                rows.push(['Domain', domain, index + 1].join('\t'));
+            });
+            
+            urls.forEach((url, index) => {
+                rows.push(['URL', url, index + 1].join('\t'));
+            });
+            
+            const content = rows.join('\n');
+            const blob = new Blob([content], { type: 'application/vnd.ms-excel;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+        }
+
+        function toggleFaq(id) {
+            const content = document.getElementById('content-' + id);
+            const toggle = document.getElementById('toggle-' + id);
+            
+            if (content.classList.contains('expanded')) {
+                content.classList.remove('expanded');
+                toggle.classList.remove('expanded');
+            } else {
+                content.classList.add('expanded');
+                toggle.classList.add('expanded');
+            }
+        }
+    </script>
+
+    <!-- Footer -->
+   <script defer src="https://static.cloudflareinsights.com/beacon.min.js/vcd15cbe7772f49c399c6a5babf22c1241717689176015" integrity="sha512-ZpsOmlRQV6y907TI0dKBHq9Md29nnaEIPlkf84rnaERnq6zvWvPUqr2ft8M1aS28oN72PdrCzSjY4U6VaAw1EQ==" data-cf-beacon='{"version":"2024.11.0","token":"20103358280b4bfebec83c59d76c6215","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>

@@ -1,0 +1,259 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReconNexus // Bug Bounty, Pentest & OSINT Helper</title>
+    <meta name="author" content="Nur Ahmed Faisal" />
+    <link rel="icon" href="logo.svg" type="image/svg+xml">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Outfit:wght@300;500;700&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        hacker: {
+                            accent: '#00f3ff', // Cyan Neon
+                            danger: '#ff2a6d',
+                        }
+                    },
+                    animation: {
+                        'glow': 'glow 2s ease-in-out infinite alternate',
+                    },
+                    keyframes: {
+                        glow: {
+                            '0%': { boxShadow: '0 0 5px rgba(0, 243, 255, 0.2)' },
+                            '100%': { boxShadow: '0 0 20px rgba(0, 243, 255, 0.6)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+<script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b0b407cc814e4fcca2145d41f214cf7a"}'></script>
+
+    <style>
+        /* --- CSS VARIABLES --- */
+        :root {
+            --bg-color: #050505;
+            --text-primary: #e5e7eb;
+            --text-secondary: #9ca3af;
+            --panel-bg: rgba(18, 18, 18, 0.65);
+            --panel-border: rgba(255, 255, 255, 0.08);
+            --input-bg: rgba(0, 0, 0, 0.4);
+            --card-hover: rgba(255, 255, 255, 0.05);
+            --accent-glow: rgba(0, 243, 255, 0.2);
+            --scrollbar-track: #0a0a0a;
+            --scrollbar-thumb: #333;
+            --toast-bg: rgba(10, 10, 10, 0.95);
+            --toast-text: #fff;
+        }
+
+        body.light-mode {
+            --bg-color: #f0f2f5;
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --panel-bg: rgba(255, 255, 255, 0.85);
+            --panel-border: rgba(0, 0, 0, 0.1);
+            --input-bg: rgba(255, 255, 255, 1);
+            --card-hover: rgba(0, 0, 0, 0.03);
+            --accent-glow: rgba(0, 119, 255, 0.15);
+            --scrollbar-track: #e5e7eb;
+            --scrollbar-thumb: #9ca3af;
+            --toast-bg: #ffffff;
+            --toast-text: #1f2937;
+        }
+
+        html { background-color: var(--bg-color); transition: background-color 0.3s ease; }
+        body { background-color: transparent; color: var(--text-primary); transition: color 0.3s ease; }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+        ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #00f3ff; }
+
+        .glass-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--panel-border);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .glass-input {
+            background: var(--input-bg);
+            border: 1px solid var(--panel-border);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+        .glass-input:focus { outline: none; border-color: #00f3ff; box-shadow: 0 0 15px var(--accent-glow); }
+
+        #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; }
+
+        .tool-card {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .tool-card:hover { transform: translateY(-2px); background: var(--card-hover); border-color: rgba(0, 243, 255, 0.4); }
+        .tool-card::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%;
+            background: #00f3ff; transform: scaleY(0); transition: transform 0.2s ease; transform-origin: bottom;
+        }
+        .tool-card:hover::before { transform: scaleY(1); transform-origin: top; }
+
+        .svg-icon { transition: all 0.3s ease; stroke: currentColor; }
+        .tool-card:hover .svg-icon { transform: scale(1.1); stroke: #00f3ff; }
+        body.light-mode .tool-card:hover .svg-icon { stroke: #0077ff; }
+
+        #toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast {
+            background: var(--toast-bg); border-left: 4px solid #00f3ff; color: var(--toast-text);
+            padding: 12px 24px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 14px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.15); animation: slideIn 0.3s ease-out forwards; opacity: 0; transform: translateX(20px);
+        }
+        .toast.error { border-color: #ff2a6d; }
+        @keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
+        @keyframes fadeOut { to { opacity: 0; transform: translateY(10px); } }
+
+        .filter-btn { background: transparent; color: var(--text-secondary); border: 1px solid var(--panel-border); }
+        .filter-btn:hover { border-color: #00f3ff; color: var(--text-primary); }
+        .filter-btn.active { background: #00f3ff; color: #000; border-color: #00f3ff; font-weight: bold; box-shadow: 0 0 10px var(--accent-glow); }
+        body.light-mode .filter-btn.active { background: #0077ff; color: #fff; border-color: #0077ff; }
+    </style>
+</head>
+<body class="antialiased overflow-x-hidden min-h-screen flex flex-col">
+
+    <canvas id="bg-canvas"></canvas>
+    <div id="toast-container"></div>
+    
+    <div class="absolute top-6 right-6 z-50">
+        <button id="theme-toggle" class="p-2 rounded-full glass-panel hover:border-hacker-accent transition-all text-hacker-accent">
+            <svg id="icon-moon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+            </svg>
+            <svg id="icon-sun" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+        </button>
+    </div>
+
+    <main class="flex-grow container mx-auto px-4 py-8 relative z-10 max-w-6xl">
+        <header class="text-center mb-10">
+            <div class="inline-block relative">
+                <h1 class="text-5xl md:text-6xl font-bold text-theme-primary tracking-tighter mb-2">
+                    RECON <span class="text-hacker-accent">NEXUS</span>
+                </h1>
+                <div class="h-1 w-full bg-gradient-to-r from-transparent via-hacker-accent to-transparent opacity-70"></div>
+                <p class="mt-3 text-theme-secondary font-mono text-xs md:text-sm tracking-[0.3em] uppercase opacity-80">
+                    [ BUG BOUNTY • PENTEST • OSINT ]
+                </p>
+            </div>
+        </header>
+
+        <div class="glass-panel rounded-xl p-6 mb-10">
+            <div class="flex justify-between items-end mb-2">
+                <label for="target" class="block text-xs font-mono text-hacker-accent uppercase tracking-widest">
+                    Target Domain
+                </label>
+                <span class="text-[10px] font-mono text-theme-secondary opacity-50 hidden md:block">
+                    // TIP: Add ?d=example.com to URL to auto-load
+                </span>
+            </div>
+            <div class="flex flex-col md:flex-row gap-4">
+                <div class="flex-grow relative">
+                    <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-theme-secondary font-mono">➜</span>
+                    <input type="text" id="target" placeholder="e.g. example.com" 
+                        class="glass-input w-full rounded-lg py-3 pl-10 pr-4 font-mono text-lg focus:ring-0" autocomplete="off">
+                </div>
+                <button onclick="validateAndExecuteActive()" 
+                    class="bg-hacker-accent/10 hover:bg-hacker-accent/20 border border-hacker-accent text-hacker-accent font-bold py-3 px-8 rounded-lg transition-all duration-300 uppercase tracking-wider text-sm whitespace-nowrap hover:shadow-[0_0_20px_rgba(0,243,255,0.3)]">
+                    Execute Scan
+                </button>
+            </div>
+            <div id="input-error" class="text-hacker-danger text-xs mt-2 font-mono hidden">⚠ ERROR: TARGET DOMAIN REQUIRED</div>
+        </div>
+
+        <div class="flex flex-wrap justify-center gap-2 mb-8" id="filter-container"></div>
+        <div id="tools-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 min-h-[200px]"></div>
+
+        <div class="mt-16 glass-panel rounded-xl p-6">
+            <h2 class="text-xl font-bold text-theme-primary mb-4 flex items-center gap-2">
+                <span class="text-hacker-purple">✦</span> EXTERNAL TOOLS
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 font-mono text-sm">
+                <a href="https://requestbin.net/" target="_blank" class="block p-3 rounded hover:bg-hacker-accent/10 border border-transparent hover:border-hacker-accent/30 transition-colors group">
+                    <span class="text-theme-secondary group-hover:text-hacker-accent transition-colors">➜</span> DNSBin (Request Interceptor)
+                </a>
+                <a href="https://hunter.io/" target="_blank" class="block p-3 rounded hover:bg-hacker-accent/10 border border-transparent hover:border-hacker-accent/30 transition-colors group">
+                    <span class="text-theme-secondary group-hover:text-hacker-accent transition-colors">➜</span> Hunter.io
+                </a>
+                <a href="https://app.interactsh.com/" target="_blank" class="block p-3 rounded hover:bg-hacker-accent/10 border border-transparent hover:border-hacker-accent/30 transition-colors group">
+                    <span class="text-theme-secondary group-hover:text-hacker-accent transition-colors">➜</span> Interactsh (OOB)
+                </a>
+                <a href="https://dnsdumpster.com/" target="_blank" class="block p-3 rounded hover:bg-hacker-accent/10 border border-transparent hover:border-hacker-accent/30 transition-colors group">
+                    <span class="text-theme-secondary group-hover:text-hacker-accent transition-colors">➜</span> DNS Dumpster
+                </a>
+                <a href="https://hackertarget.com/dns-lookup/" target="_blank" class="block p-3 rounded hover:bg-hacker-accent/10 border border-transparent hover:border-hacker-accent/30 transition-colors group">
+                    <span class="text-theme-secondary group-hover:text-hacker-accent transition-colors">➜</span> HackerTarget DNS
+                </a>
+                 <a href="https://gchq.github.io/CyberChef/" target="_blank" class="block p-3 rounded hover:bg-hacker-accent/10 border border-transparent hover:border-hacker-accent/30 transition-colors group">
+                    <span class="text-theme-secondary group-hover:text-hacker-accent transition-colors">➜</span> CyberChef
+                </a>
+                <a href="https://regex101.com/" target="_blank" class="block p-3 rounded hover:bg-hacker-accent/10 border border-transparent hover:border-hacker-accent/30 transition-colors group">
+                    <span class="text-theme-secondary group-hover:text-hacker-accent transition-colors">➜</span> Regex101
+                </a>
+                <a href="https://www.jwt.io/" target="_blank" class="block p-3 rounded hover:bg-hacker-accent/10 border border-transparent hover:border-hacker-accent/30 transition-colors group">
+                    <span class="text-theme-secondary group-hover:text-hacker-accent transition-colors">➜</span> JWT.io
+                </a>
+                <a href="https://breachdirectory.com/" target="_blank" class="block p-3 rounded hover:bg-hacker-accent/10 border border-transparent hover:border-hacker-accent/30 transition-colors group">
+                    <span class="text-theme-secondary group-hover:text-hacker-accent transition-colors">➜</span> Breach Directory
+                </a>
+                <a href="https://www.smartconversion.com/unit_conversion/IP_Address_Converter.aspx" target="_blank" class="block p-3 rounded hover:bg-hacker-accent/10 border border-transparent hover:border-hacker-accent/30 transition-colors group">
+                    <span class="text-theme-secondary group-hover:text-hacker-accent transition-colors">➜</span> IP Converter
+                </a>
+                <a href="https://www.smartconversion.com/ip-address-long-number-converter" target="_blank" class="block p-3 rounded hover:bg-hacker-accent/10 border border-transparent hover:border-hacker-accent/30 transition-colors group">
+                    <span class="text-theme-secondary group-hover:text-hacker-accent transition-colors">➜</span> IP to Long
+                </a>
+                <a href="https://whoisrequest.com/history/" target="_blank" class="block p-3 rounded hover:bg-hacker-accent/10 border border-transparent hover:border-hacker-accent/30 transition-colors group">
+                    <span class="text-theme-secondary group-hover:text-hacker-accent transition-colors">➜</span> Domain History
+                </a>
+                 <a href="https://publicwww.com/" target="_blank" class="block p-3 rounded hover:bg-hacker-accent/10 border border-transparent hover:border-hacker-accent/30 transition-colors group">
+                    <span class="text-theme-secondary group-hover:text-hacker-accent transition-colors">➜</span> Source Code Search
+                </a>
+                 <a href="https://developers.facebook.com/tools/ct/" target="_blank" class="block p-3 rounded hover:bg-hacker-accent/10 border border-transparent hover:border-hacker-accent/30 transition-colors group">
+                    <span class="text-theme-secondary group-hover:text-hacker-accent transition-colors">➜</span> FB Cert Transparency
+                </a>
+            </div>
+        </div>
+
+        <footer class="mt-16 text-center pb-8 flex flex-col items-center justify-center gap-4">
+            <div class="flex items-center justify-center gap-2">
+                 <span class="text-theme-secondary font-mono text-sm">By:</span>
+                 <img src="https://assets.faisalahmed.me/faisalname.png" alt="Signature" class="h-8 opacity-50 hover:opacity-100 transition-opacity">
+            </div>
+            <a href="/old/" class="text-xs font-mono text-theme-secondary hover:text-hacker-accent transition-colors">
+                [ If you still want to use old version: click here ]
+            </a>
+        </footer>
+    </main>
+
+    <script src="script.js"></script>
+<script defer src="https://static.cloudflareinsights.com/beacon.min.js/v833ccba57c9e4d2798f2e76cebdd09a11778172276447" integrity="sha512-57MDmcccJXYtNnH+ZiBwzC4jb2rvgVCEokYN+L/nLlmO8rfYT/gIpW2A569iJ/3b+0UEasghjuZH/ma3wIs/EQ==" data-cf-beacon='{"version":"2024.11.0","token":"cfe411b8facb412e9ec67884a774d48e","r":1,"server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
+</body>
+</html>

@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exact Duplicate Remover</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: Arial, sans-serif;
+        max-width: 1400px;
+        margin: 20px auto;
+        padding: 20px;
+        background: #f5f5f5;
+    }
+
+    h1 {
+        margin-top: 0;
+    }
+
+    .stats {
+        margin: 10px 0;
+        font-weight: bold;
+    }
+
+    textarea {
+        width: 100%;
+        height: 300px;
+        padding: 12px;
+        margin-bottom: 15px;
+        font-family: Consolas, Monaco, monospace;
+        font-size: 14px;
+        resize: vertical;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        background: white;
+    }
+
+    button {
+        padding: 10px 20px;
+        margin-right: 10px;
+        margin-bottom: 20px;
+        cursor: pointer;
+        border: none;
+        border-radius: 5px;
+        background: #0078d7;
+        color: white;
+        font-size: 14px;
+    }
+
+    button:hover {
+        background: #005fb8;
+    }
+</style>
+</head>
+<body>
+
+<h1>Exact Duplicate Remover</h1>
+
+<p>
+Removes only lines that are <strong>100% identical</strong>.
+Everything is treated literally:
+uppercase/lowercase, dots, slashes, spaces, tabs,
+special characters, encoded characters (%2f, %2e, etc.).
+</p>
+
+<h3>Input</h3>
+<div class="stats">
+    Lines: <span id="inputCount">0</span>
+</div>
+
+<textarea
+    id="input"
+    spellcheck="false"
+    autocapitalize="off"
+    autocomplete="off"
+    placeholder="Paste data here..."
+></textarea>
+
+<button onclick="dedupe()">Remove Duplicates</button>
+<button onclick="copyOutput()">Copy Output</button>
+<button onclick="downloadOutput()">Download Output</button>
+
+<h3>Output</h3>
+<div class="stats">
+    Lines: <span id="outputCount">0</span> |
+    Removed: <span id="removedCount">0</span>
+</div>
+
+<textarea
+    id="output"
+    readonly
+    spellcheck="false"
+    autocapitalize="off"
+    autocomplete="off"
+></textarea>
+
+<script>
+const input = document.getElementById('input');
+const output = document.getElementById('output');
+
+function getLines(text) {
+    if (text === "") return [];
+    return text.replace(/\r/g, '').split('\n');
+}
+
+function updateInputCount() {
+    document.getElementById('inputCount').textContent =
+        getLines(input.value).length;
+}
+
+input.addEventListener('input', updateInputCount);
+
+function dedupe() {
+    const lines = getLines(input.value);
+
+    const seen = new Set();
+    const result = [];
+
+    for (const line of lines) {
+        // Exact comparison only
+        if (!seen.has(line)) {
+            seen.add(line);
+            result.push(line);
+        }
+    }
+
+    output.value = result.join('\n');
+
+    document.getElementById('outputCount').textContent =
+        result.length;
+
+    document.getElementById('removedCount').textContent =
+        lines.length - result.length;
+}
+
+async function copyOutput() {
+    try {
+        await navigator.clipboard.writeText(output.value);
+        alert('Output copied.');
+    } catch {
+        output.select();
+        document.execCommand('copy');
+        alert('Output copied.');
+    }
+}
+
+function downloadOutput() {
+    const blob = new Blob(
+        [output.value],
+        { type: 'text/plain;charset=utf-8' }
+    );
+
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'deduped.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+}
+</script>
+
+</body>
+</html>

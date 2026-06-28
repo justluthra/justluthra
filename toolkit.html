@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyber Toolkit</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    background:#0f172a;
+    color:white;
+    font-family:Segoe UI,Arial,sans-serif;
+    height:100vh;
+    overflow:hidden;
+}
+
+.header{
+    background:#111827;
+    padding:12px;
+    text-align:center;
+    font-size:24px;
+    font-weight:bold;
+    color:#00e5ff;
+    border-bottom:2px solid #00e5ff;
+}
+
+.toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    padding:10px;
+    justify-content:center;
+    background:#1e293b;
+}
+
+button{
+    border:none;
+    padding:10px 15px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
+    background:#00e5ff;
+    color:black;
+    transition:transform .15s, box-shadow .15s;
+}
+
+button:hover{
+    transform:translateY(-2px);
+    box-shadow:0 0 12px rgba(0,229,255,.5);
+}
+
+.container{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:15px;
+    padding:15px;
+    height:calc(100vh - 120px);
+    overflow:hidden;
+}
+
+.panel{
+    background:#1e293b;
+    border-radius:15px;
+    padding:15px;
+    box-shadow:0 0 20px rgba(0,229,255,.2);
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+}
+
+h3{
+    margin-bottom:10px;
+    color:#00ff88;
+}
+
+textarea{
+    flex:1;
+    width:100%;
+    resize:none;
+    background:#0f172a;
+    color:#00ff88;
+    border:1px solid #334155;
+    border-radius:10px;
+    padding:12px;
+    font-family:Consolas,monospace;
+    font-size:13px;
+}
+
+/* ── JWT Modal ── */
+.modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.85);
+    justify-content:center;
+    align-items:flex-start;
+    padding:20px;
+    overflow-y:auto;
+    z-index:1000;
+}
+
+.modal.active{ display:flex; }
+
+.modal-content{
+    background:#1e293b;
+    padding:20px;
+    border-radius:15px;
+    text-align:center;
+}
+
+.close-btn{
+    margin-top:15px;
+    background:#ff4d6d;
+    color:white;
+}
+
+/* ── JWT Editor Modal ── */
+#jwtModal .modal-content{
+    width:100%;
+    max-width:960px;
+    text-align:left;
+    border:1px solid #00e5ff44;
+    box-shadow:0 0 40px rgba(0,229,255,.15);
+}
+
+#jwtModal h2{
+    color:#00e5ff;
+    margin-bottom:16px;
+    font-size:20px;
+    border-bottom:1px solid #334155;
+    padding-bottom:10px;
+}
+
+.jwt-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:14px;
+}
+
+@media(max-width:700px){
+    .jwt-grid{ grid-template-columns:1fr; }
+    .container{ grid-template-columns:1fr; height:auto; overflow:auto; }
+    body{ overflow:auto; }
+}
+
+.jwt-section{
+    background:#0f172a;
+    border-radius:12px;
+    padding:14px;
+    border:1px solid #1e3a5f;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.jwt-section label{
+    font-size:12px;
+    font-weight:bold;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+}
+
+.jwt-section label.lbl-header{ color:#fb923c; }
+.jwt-section label.lbl-payload{ color:#a78bfa; }
+.jwt-section label.lbl-secret{ color:#34d399; }
+.jwt-section label.lbl-output{ color:#00e5ff; }
+.jwt-section label.lbl-info{ color:#f472b6; }
+
+.jwt-ta{
+    width:100%;
+    background:#111827;
+    color:#e2e8f0;
+    border:1px solid #334155;
+    border-radius:8px;
+    padding:10px;
+    font-family:Consolas,monospace;
+    font-size:12px;
+    resize:vertical;
+    min-height:130px;
+    transition:border-color .2s;
+}
+
+.jwt-ta:focus{
+    outline:none;
+    border-color:#00e5ff66;
+    box-shadow:0 0 0 2px rgba(0,229,255,.1);
+}
+
+.jwt-ta.ta-header{ color:#fb923c; }
+.jwt-ta.ta-payload{ color:#a78bfa; }
+.jwt-ta.ta-output{ color:#00e5ff; min-height:70px; }
+
+.jwt-controls{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    margin-top:4px;
+}
+
+.jwt-check-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    color:#94a3b8;
+    cursor:pointer;
+    user-select:none;
+}
+
+.jwt-check-row input[type=checkbox]{
+    accent-color:#00e5ff;
+    width:15px;
+    height:15px;
+    cursor:pointer;
+}
+
+.jwt-secret-row{
+    display:flex;
+    gap:8px;
+    align-items:center;
+}
+
+.jwt-secret-input{
+    flex:1;
+    background:#111827;
+    color:#34d399;
+    border:1px solid #334155;
+    border-radius:8px;
+    padding:8px 12px;
+    font-family:Consolas,monospace;
+    font-size:13px;
+}
+
+.jwt-secret-input:focus{
+    outline:none;
+    border-color:#34d39966;
+}
+
+.sig-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:5px 12px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:bold;
+    letter-spacing:.04em;
+}
+
+.sig-valid{   background:#052e16; color:#4ade80; border:1px solid #166534; }
+.sig-invalid{ background:#2d0a0a; color:#f87171; border:1px solid #7f1d1d; }
+.sig-warn{    background:#1c1a05; color:#facc15; border:1px solid #713f12; }
+.sig-none{    background:#1e293b; color:#64748b; border:1px solid #334155; }
+
+.exp-valid{   background:#052e16; color:#4ade80; border:1px solid #166534; }
+.exp-expired{ background:#2d0a0a; color:#f87171; border:1px solid #7f1d1d; }
+
+.info-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+}
+
+.info-row{
+    background:#111827;
+    border-radius:6px;
+    padding:7px 10px;
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+}
+
+.info-row .info-key{
+    font-size:10px;
+    color:#64748b;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+}
+
+.info-row .info-val{
+    font-size:12px;
+    color:#e2e8f0;
+    font-family:Consolas,monospace;
+    word-break:break-all;
+}
+
+.jwt-token-display{
+    background:#111827;
+    border-radius:8px;
+    padding:10px 12px;
+    font-family:Consolas,monospace;
+    font-size:11px;
+    word-break:break-all;
+    line-height:1.7;
+    border:1px solid #1e3a5f;
+}
+
+.jwt-token-display .part-header{ color:#fb923c; }
+.jwt-token-display .part-dot{    color:#64748b; }
+.jwt-token-display .part-payload{ color:#a78bfa; }
+.jwt-token-display .part-sig{    color:#34d399; }
+
+.jwt-copy-btn{
+    background:#1e3a5f;
+    color:#00e5ff;
+    border:1px solid #00e5ff44;
+    padding:7px 14px;
+    border-radius:8px;
+    font-size:12px;
+    cursor:pointer;
+    font-weight:bold;
+    align-self:flex-start;
+}
+
+.jwt-copy-btn:hover{
+    background:#0f2a4f;
+    box-shadow:0 0 10px rgba(0,229,255,.3);
+}
+
+.jwt-err{
+    color:#f87171;
+    font-size:12px;
+    font-family:Consolas,monospace;
+    min-height:16px;
+}
+
+.section-spacer{ margin-top:6px; }
+
+/* scrollable jwt output area inside modal */
+#jwtModal .modal-content{
+    max-height:94vh;
+    overflow-y:auto;
+}
+
+/* QR modal */
+#qrModal .modal-content{
+    text-align:center;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+⚡ Cryptographer Toolkit ⚡
+</div>
+
+<div class="toolbar">
+    <button onclick="hexEncode()">HEX Encode</button>
+    <button onclick="hexDecode()">HEX Decode</button>
+    <button onclick="base64Encode()">Base64 Encode</button>
+    <button onclick="base64Decode()">Base64 Decode</button>
+    <button onclick="urlEncode()">URL Encode</button>
+    <button onclick="urlDecode()">URL Decode</button>
+    <button onclick="openJWTEditor()">JWT Editor</button>
+    <button onclick="sha256Hash()">SHA256</button>
+    <button onclick="jsonBeautify()">JSON Format</button>
+    <button onclick="showQR()">QR Code</button>
+    <button onclick="copyOutput()">Copy Output</button>
+    <button onclick="clearAll()">Clear</button>
+</div>
+
+<div class="container">
+    <div class="panel">
+        <h3>Input</h3>
+        <textarea id="input" placeholder="Paste or type here…"></textarea>
+    </div>
+    <div class="panel">
+        <h3>Output</h3>
+        <textarea id="output" readonly placeholder="Result appears here…"></textarea>
+    </div>
+</div>
+
+<!-- ══════════════════════════ JWT EDITOR MODAL ══════════════════════════ -->
+<div class="modal" id="jwtModal">
+<div class="modal-content">
+
+    <h2>🔐 JWT Editor</h2>
+
+    <div class="jwt-grid">
+
+        <!-- LEFT COL -->
+        <div style="display:flex;flex-direction:column;gap:14px;">
+
+            <!-- Header -->
+            <div class="jwt-section">
+                <label class="lbl-header">▸ Header</label>
+                <textarea id="jwtHeaderTA" class="jwt-ta ta-header" rows="5"
+                    oninput="onPartChange()" spellcheck="false"></textarea>
+                <span class="jwt-err" id="jwtHeaderErr"></span>
+            </div>
+
+            <!-- Payload -->
+            <div class="jwt-section">
+                <label class="lbl-payload">▸ Payload</label>
+                <textarea id="jwtPayloadTA" class="jwt-ta ta-payload" rows="8"
+                    oninput="onPartChange()" spellcheck="false"></textarea>
+                <span class="jwt-err" id="jwtPayloadErr"></span>
+            </div>
+
+            <!-- Controls -->
+            <div class="jwt-section">
+                <label class="lbl-secret">▸ Signing</label>
+
+                <div class="jwt-secret-row">
+                    <input id="jwtSecret" class="jwt-secret-input" type="text"
+                        placeholder="HMAC secret (leave empty for none)"
+                        oninput="onPartChange()">
+                </div>
+
+                <div class="jwt-controls section-spacer">
+                    <label class="jwt-check-row">
+                        <input type="checkbox" id="chkKeepSig" onchange="onPartChange()">
+                        Keep original signature
+                    </label>
+                    <label class="jwt-check-row">
+                        <input type="checkbox" id="chkUnsigned" onchange="onPartChange()">
+                        Generate unsigned JWT &nbsp;<code style="color:#64748b;font-size:11px">(header.payload.)</code>
+                    </label>
+                </div>
+
+                <!-- Signature status -->
+                <div style="margin-top:8px;" id="sigStatusWrap">
+                    <span class="sig-badge sig-none" id="sigStatus">⚠ No token</span>
+                </div>
+
+                <span class="jwt-err section-spacer" id="jwtGlobalErr"></span>
+            </div>
+
+        </div>
+
+        <!-- RIGHT COL -->
+        <div style="display:flex;flex-direction:column;gap:14px;">
+
+            <!-- Coloured token display -->
+            <div class="jwt-section">
+                <label class="lbl-output">▸ Encoded Token</label>
+                <div class="jwt-token-display" id="jwtColoredToken">—</div>
+                <button class="jwt-copy-btn section-spacer" onclick="copyJWT()">⎘ Copy Token</button>
+            </div>
+
+            <!-- Raw output -->
+            <div class="jwt-section">
+                <label class="lbl-output">▸ Raw Output</label>
+                <textarea id="jwtRawOutput" class="jwt-ta ta-output" rows="4"
+                    spellcheck="false" oninput="onRawOutputChange()"></textarea>
+            </div>
+
+            <!-- Info panel -->
+            <div class="jwt-section">
+                <label class="lbl-info">▸ Token Info</label>
+                <div style="margin-bottom:6px;" id="expBadgeWrap"></div>
+                <div class="info-grid" id="jwtInfoGrid">
+                    <div class="info-row"><span class="info-key">Algorithm</span><span class="info-val" id="inf-alg">—</span></div>
+                    <div class="info-row"><span class="info-key">Type</span><span class="info-val" id="inf-typ">—</span></div>
+                    <div class="info-row"><span class="info-key">Issued At</span><span class="info-val" id="inf-iat">—</span></div>
+                    <div class="info-row"><span class="info-key">Expiration</span><span class="info-val" id="inf-exp">—</span></div>
+                    <div class="info-row"><span class="info-key">Not Before</span><span class="info-val" id="inf-nbf">—</span></div>
+                    <div class="info-row"><span class="info-key">Issuer</span><span class="info-val" id="inf-iss">—</span></div>
+                    <div class="info-row"><span class="info-key">Audience</span><span class="info-val" id="inf-aud">—</span></div>
+                    <div class="info-row"><span class="info-key">Subject</span><span class="info-val" id="inf-sub">—</span></div>
+                    <div class="info-row"><span class="info-key">JWT ID</span><span class="info-val" id="inf-jti">—</span></div>
+                    <div class="info-row"><span class="info-key">Key ID</span><span class="info-val" id="inf-kid">—</span></div>
+                </div>
+            </div>
+
+        </div>
+    </div><!-- /jwt-grid -->
+
+    <div style="margin-top:16px;text-align:right;">
+        <button class="close-btn" onclick="closeJWT()">✕ Close</button>
+    </div>
+
+</div>
+</div>
+
+<!-- QR Modal -->
+<div class="modal" id="qrModal">
+    <div class="modal-content">
+        <h2>QR Code</h2>
+        <div id="qrcode" style="margin:16px auto;display:inline-block;"></div>
+        <br>
+        <button class="close-btn" onclick="closeQR()">Close</button>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<script>
+/* ────────────────────────────────────────────────────────────────────────
+   UTILITY TOOLS
+   ──────────────────────────────────────────────────────────────────────── */
+function getInput()  { return document.getElementById("input").value; }
+function setOutput(v){ document.getElementById("output").value = v; }
+
+function clearAll(){
+    document.getElementById("input").value  = "";
+    document.getElementById("output").value = "";
+}
+
+function hexEncode(){
+    const text = getInput();
+    let hex = "";
+    for(let i = 0; i < text.length; i++)
+        hex += text.charCodeAt(i).toString(16).padStart(2,"0");
+    setOutput(hex);
+}
+
+function hexDecode(){
+    const hex = getInput().replace(/\s/g,"");
+    let out = "";
+    for(let i = 0; i < hex.length; i += 2)
+        out += String.fromCharCode(parseInt(hex.substr(i,2),16));
+    setOutput(out);
+}
+
+function base64Encode(){
+    setOutput(btoa(unescape(encodeURIComponent(getInput()))));
+}
+
+function base64Decode(){
+    try{
+        setOutput(decodeURIComponent(escape(atob(getInput()))));
+    }catch{
+        alert("Invalid Base64");
+    }
+}
+
+function urlEncode(){
+    setOutput(encodeURIComponent(getInput()));
+}
+
+function urlDecode(){
+    try{
+        setOutput(decodeURIComponent(getInput()));
+    }catch{
+        alert("Invalid URL encoding");
+    }
+}
+
+function jsonBeautify(){
+    try{
+        setOutput(JSON.stringify(JSON.parse(getInput()),null,4));
+    }catch{
+        alert("Invalid JSON");
+    }
+}
+
+async function sha256Hash(){
+    const data = new TextEncoder().encode(getInput());
+    const hash = await crypto.subtle.digest("SHA-256", data);
+    const hex  = [...new Uint8Array(hash)]
+                    .map(x => x.toString(16).padStart(2,"0")).join("");
+    setOutput(hex);
+}
+
+function copyOutput(){
+    navigator.clipboard.writeText(document.getElementById("output").value);
+}
+
+function showQR(){
+    const text = getInput();
+    if(!text){ alert("Nothing to encode"); return; }
+    document.getElementById("qrcode").innerHTML = "";
+    new QRCode(document.getElementById("qrcode"),{ text, width:300, height:300 });
+    document.getElementById("qrModal").classList.add("active");
+}
+
+function closeQR(){
+    document.getElementById("qrModal").classList.remove("active");
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   BASE64URL HELPERS  (correct UTF-8 <-> Base64URL)
+   ──────────────────────────────────────────────────────────────────────── */
+function b64urlEncode(str){
+    // str is a plain JS string; encode as UTF-8 bytes then Base64URL
+    const bytes = new TextEncoder().encode(str);
+    let bin = "";
+    bytes.forEach(b => bin += String.fromCharCode(b));
+    return btoa(bin).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+}
+
+function b64urlEncodeBytes(uint8){
+    let bin = "";
+    uint8.forEach(b => bin += String.fromCharCode(b));
+    return btoa(bin).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+}
+
+function b64urlDecode(str){
+    // returns a JS string (UTF-8 decoded)
+    str = str.replace(/-/g,"+").replace(/_/g,"/");
+    while(str.length % 4) str += "=";
+    const bin = atob(str);
+    const bytes = new Uint8Array(bin.length);
+    for(let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+}
+
+function b64urlDecodeToBytes(str){
+    str = str.replace(/-/g,"+").replace(/_/g,"/");
+    while(str.length % 4) str += "=";
+    const bin = atob(str);
+    const bytes = new Uint8Array(bin.length);
+    for(let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return bytes;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   WEB CRYPTO – HMAC SIGN / VERIFY
+   ──────────────────────────────────────────────────────────────────────── */
+const HMAC_ALGOS = { HS256:"SHA-256", HS384:"SHA-384", HS512:"SHA-512" };
+
+async function hmacSign(alg, secret, data){
+    const keyBytes  = new TextEncoder().encode(secret);
+    const dataBytes = new TextEncoder().encode(data);
+    const cryptoKey = await crypto.subtle.importKey(
+        "raw", keyBytes,
+        { name:"HMAC", hash: HMAC_ALGOS[alg] },
+        false, ["sign"]
+    );
+    const sig = await crypto.subtle.sign("HMAC", cryptoKey, dataBytes);
+    return b64urlEncodeBytes(new Uint8Array(sig));
+}
+
+async function hmacVerify(alg, secret, data, sigB64u){
+    try{
+        const keyBytes  = new TextEncoder().encode(secret);
+        const dataBytes = new TextEncoder().encode(data);
+        const sigBytes  = b64urlDecodeToBytes(sigB64u);
+        const cryptoKey = await crypto.subtle.importKey(
+            "raw", keyBytes,
+            { name:"HMAC", hash: HMAC_ALGOS[alg] },
+            false, ["verify"]
+        );
+        return await crypto.subtle.verify("HMAC", cryptoKey, sigBytes, dataBytes);
+    }catch{
+        return false;
+    }
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   JWT EDITOR STATE
+   ──────────────────────────────────────────────────────────────────────── */
+let _originalParts = null; // { header, payload, sig } raw b64url strings
+
+/* ────────────────────────────────────────────────────────────────────────
+   OPEN / CLOSE
+   ──────────────────────────────────────────────────────────────────────── */
+function openJWTEditor(){
+    const raw = getInput().trim();
+    resetJWTEditor();
+    if(raw) loadToken(raw);
+    document.getElementById("jwtModal").classList.add("active");
+}
+
+function closeJWT(){
+    document.getElementById("jwtModal").classList.remove("active");
+}
+
+function resetJWTEditor(){
+    _originalParts = null;
+    el("jwtHeaderTA").value  = JSON.stringify({ alg:"HS256", typ:"JWT" }, null, 4);
+    el("jwtPayloadTA").value = JSON.stringify({ sub:"1234567890", name:"John Doe", iat: Math.floor(Date.now()/1000) }, null, 4);
+    el("jwtSecret").value    = "";
+    el("chkKeepSig").checked  = false;
+    el("chkUnsigned").checked = false;
+    clearErrors();
+    scheduleReencode();
+}
+
+function el(id){ return document.getElementById(id); }
+
+function clearErrors(){
+    el("jwtHeaderErr").textContent  = "";
+    el("jwtPayloadErr").textContent = "";
+    el("jwtGlobalErr").textContent  = "";
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   LOAD TOKEN FROM STRING
+   ──────────────────────────────────────────────────────────────────────── */
+function loadToken(raw){
+    clearErrors();
+    const parts = raw.split(".");
+    if(parts.length < 2){
+        el("jwtGlobalErr").textContent = "⚠ Not a valid JWT (need at least 2 parts)";
+        return;
+    }
+
+    try{
+        const headerObj  = JSON.parse(b64urlDecode(parts[0]));
+        el("jwtHeaderTA").value = JSON.stringify(headerObj, null, 4);
+    }catch(e){
+        el("jwtHeaderErr").textContent = "⚠ Invalid header: " + e.message;
+    }
+
+    try{
+        const payloadObj = JSON.parse(b64urlDecode(parts[1]));
+        el("jwtPayloadTA").value = JSON.stringify(payloadObj, null, 4);
+    }catch(e){
+        el("jwtPayloadErr").textContent = "⚠ Invalid payload: " + e.message;
+    }
+
+    _originalParts = {
+        header:  parts[0],
+        payload: parts[1],
+        sig:     parts[2] || ""
+    };
+
+    scheduleReencode();
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   RAW OUTPUT → PARSE BACK ON EDIT
+   ──────────────────────────────────────────────────────────────────────── */
+function onRawOutputChange(){
+    const raw = el("jwtRawOutput").value.trim();
+    if(raw) loadToken(raw);
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   DEBOUNCE RE-ENCODE
+   ──────────────────────────────────────────────────────────────────────── */
+let _reencodeTimer = null;
+function onPartChange(){ scheduleReencode(); }
+
+function scheduleReencode(){
+    clearTimeout(_reencodeTimer);
+    _reencodeTimer = setTimeout(reencodeJWT, 120);
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   MAIN RE-ENCODE
+   ──────────────────────────────────────────────────────────────────────── */
+async function reencodeJWT(){
+    clearErrors();
+
+    const keepSig  = el("chkKeepSig").checked;
+    const unsigned = el("chkUnsigned").checked;
+    const secret   = el("jwtSecret").value;
+
+    // --- parse header ---
+    let headerObj;
+    try{
+        headerObj = JSON.parse(el("jwtHeaderTA").value);
+    }catch(e){
+        el("jwtHeaderErr").textContent = "⚠ Invalid JSON: " + e.message;
+        setSigBadge("none","⚠ Fix header JSON");
+        return;
+    }
+
+    // --- parse payload ---
+    let payloadObj;
+    try{
+        payloadObj = JSON.parse(el("jwtPayloadTA").value);
+    }catch(e){
+        el("jwtPayloadErr").textContent = "⚠ Invalid JSON: " + e.message;
+        setSigBadge("none","⚠ Fix payload JSON");
+        return;
+    }
+
+    const alg = headerObj.alg || "none";
+
+    // encode header + payload
+    const headerB64  = b64urlEncode(JSON.stringify(headerObj));
+    const payloadB64 = b64urlEncode(JSON.stringify(payloadObj));
+    const sigInput   = headerB64 + "." + payloadB64;
+
+    let sigB64 = "";
+    let token  = "";
+
+    if(unsigned){
+        // header.payload.   (trailing dot)
+        token = sigInput + ".";
+        setSigBadge("warn","⚠ Unsigned JWT");
+
+    }else if(keepSig && _originalParts){
+        sigB64 = _originalParts.sig;
+        token  = sigInput + "." + sigB64;
+        // verify kept sig
+        if(HMAC_ALGOS[alg] && secret){
+            const valid = await hmacVerify(alg, secret, sigInput, sigB64);
+            setSigBadge(valid ? "valid" : "invalid", valid ? "✔ Valid" : "❌ Invalid");
+        }else{
+            setSigBadge("warn","⚠ Original signature kept");
+        }
+
+    }else if(HMAC_ALGOS[alg] && secret){
+        // sign with HMAC
+        try{
+            sigB64 = await hmacSign(alg, secret, sigInput);
+            token  = sigInput + "." + sigB64;
+            // immediately verify
+            const valid = await hmacVerify(alg, secret, sigInput, sigB64);
+            setSigBadge(valid ? "valid" : "invalid", valid ? "✔ Valid" : "❌ Invalid");
+        }catch(e){
+            el("jwtGlobalErr").textContent = "⚠ Signing error: " + e.message;
+            setSigBadge("invalid","❌ Sign error");
+            return;
+        }
+
+    }else if(alg === "none"){
+        token = sigInput + ".";
+        setSigBadge("warn","⚠ Algorithm: none");
+
+    }else if(!HMAC_ALGOS[alg]){
+        // unsupported alg – show token without sig (can't sign)
+        token = sigInput + ".";
+        setSigBadge("warn","⚠ Algorithm unsupported");
+        el("jwtGlobalErr").textContent = `⚠ ${alg} is not supported. Supported: HS256, HS384, HS512`;
+
+    }else{
+        // HMAC alg but no secret
+        token = sigInput + ".";
+        setSigBadge("none","⚠ Signature Missing");
+    }
+
+    // --- update outputs ---
+    el("jwtRawOutput").value = token;
+    renderColoredToken(token);
+    updateInfoPanel(headerObj, payloadObj);
+
+    // push to main output textarea so Copy Output works
+    setOutput(token);
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   COLOURED TOKEN DISPLAY
+   ──────────────────────────────────────────────────────────────────────── */
+function renderColoredToken(token){
+    const parts = token.split(".");
+    const hp    = esc(parts[0] || "");
+    const pp    = esc(parts[1] || "");
+    const sp    = esc(parts[2] || "");
+    el("jwtColoredToken").innerHTML =
+        `<span class="part-header">${hp}</span>` +
+        `<span class="part-dot">.</span>` +
+        `<span class="part-payload">${pp}</span>` +
+        `<span class="part-dot">.</span>` +
+        `<span class="part-sig">${sp}</span>`;
+}
+
+function esc(s){
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   SIGNATURE BADGE
+   ──────────────────────────────────────────────────────────────────────── */
+function setSigBadge(type, text){
+    const badge = el("sigStatus");
+    badge.className = "sig-badge " + {
+        valid:"sig-valid", invalid:"sig-invalid", warn:"sig-warn", none:"sig-none"
+    }[type];
+    badge.textContent = text;
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   INFO PANEL
+   ──────────────────────────────────────────────────────────────────────── */
+function updateInfoPanel(headerObj, payloadObj){
+    function fmtTime(ts){
+        if(!ts) return "—";
+        try{ return new Date(ts*1000).toISOString().replace("T"," ").slice(0,19) + " UTC"; }
+        catch{ return String(ts); }
+    }
+
+    function setInfo(id, val){
+        el("inf-"+id).textContent = (val !== undefined && val !== null) ? String(val) : "—";
+    }
+
+    setInfo("alg", headerObj.alg);
+    setInfo("typ", headerObj.typ);
+    setInfo("iat", fmtTime(payloadObj.iat));
+    setInfo("exp", fmtTime(payloadObj.exp));
+    setInfo("nbf", fmtTime(payloadObj.nbf));
+    setInfo("iss", payloadObj.iss);
+    setInfo("aud", Array.isArray(payloadObj.aud) ? payloadObj.aud.join(", ") : payloadObj.aud);
+    setInfo("sub", payloadObj.sub);
+    setInfo("jti", payloadObj.jti);
+    setInfo("kid", headerObj.kid);
+
+    // expiration badge
+    const expWrap = el("expBadgeWrap");
+    if(payloadObj.exp){
+        const now     = Math.floor(Date.now()/1000);
+        const expired = now > payloadObj.exp;
+        const diff    = payloadObj.exp - now;
+        const label   = expired
+            ? `❌ Expired ${formatDiff(-diff)} ago`
+            : `✔ Valid — expires in ${formatDiff(diff)}`;
+        expWrap.innerHTML = `<span class="sig-badge ${expired ? "exp-expired" : "exp-valid"}">${label}</span>`;
+    }else{
+        expWrap.innerHTML = "";
+    }
+}
+
+function formatDiff(secs){
+    if(secs < 60)   return secs + "s";
+    if(secs < 3600) return Math.floor(secs/60) + "m";
+    if(secs < 86400)return Math.floor(secs/3600) + "h";
+    return Math.floor(secs/86400) + "d";
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   COPY TOKEN
+   ──────────────────────────────────────────────────────────────────────── */
+function copyJWT(){
+    const token = el("jwtRawOutput").value;
+    if(!token) return;
+    navigator.clipboard.writeText(token).then(()=>{
+        const btn = event.target;
+        const orig = btn.textContent;
+        btn.textContent = "✔ Copied!";
+        setTimeout(()=>{ btn.textContent = orig; }, 1500);
+    });
+}
+
+/* ────────────────────────────────────────────────────────────────────────
+   LIVE AUTO-DETECT: paste JWT into main input → auto-open editor
+   ──────────────────────────────────────────────────────────────────────── */
+document.getElementById("input").addEventListener("input", function(){
+    const v = this.value.trim();
+    // a JWT has exactly 2 dots and starts with eyJ
+    if(/^eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+(\.[A-Za-z0-9_-]*)?$/.test(v)){
+        // update editor if already open
+        if(document.getElementById("jwtModal").classList.contains("active")){
+            loadToken(v);
+        }
+    }
+});
+</script>
+
+</body>
+</html>

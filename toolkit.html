@@ -270,35 +270,51 @@ async function sha256Hash(){
     setOutput(hex);
 }
 
-function jwtDecode(){
+function base64url(str){
 
-    let token=getInput().trim();
+    return btoa(unescape(encodeURIComponent(str)))
+        .replace(/\+/g,'-')
+        .replace(/\//g,'_')
+        .replace(/=+$/,'');
 
-    let parts=token.split('.');
+}
 
-    if(parts.length<2){
-        alert("Invalid JWT");
-        return;
-    }
-
-    function decode(str){
-        str=str.replace(/-/g,'+').replace(/_/g,'/');
-        while(str.length%4) str+='=';
-        return JSON.parse(atob(str));
-    }
+function jwtEncode(){
 
     try{
 
-        let header=decode(parts[0]);
-        let payload=decode(parts[1]);
+        let header = JSON.parse(
+            document.getElementById("jwtHeader").value
+        );
 
-        document.getElementById("jwt").innerHTML=
-        "<h3>JWT Header</h3><pre>"+JSON.stringify(header,null,2)+"</pre>"+
-        "<h3>JWT Payload</h3><pre>"+JSON.stringify(payload,null,2)+"</pre>";
+        let payload = JSON.parse(
+            document.getElementById("jwtPayload").value
+        );
+
+        let encodedHeader = base64url(
+            JSON.stringify(header)
+        );
+
+        let encodedPayload = base64url(
+            JSON.stringify(payload)
+        );
+
+        // Reuse old signature (will NOT be valid if modified)
+        let token =
+            encodedHeader +
+            "." +
+            encodedPayload +
+            "." +
+            originalSignature;
+
+        setOutput(token);
 
     }catch{
-        alert("JWT Decode Error");
+
+        alert("Invalid JSON");
+
     }
+
 }
 
 function copyOutput(){

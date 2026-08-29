@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JS Bundle Analyzer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background: #0d1117;
+      color: #e6edf3;
+      padding: 2rem 1.5rem;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+    h1 {
+      font-size: 2rem;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    h1 small {
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: #8b949e;
+      margin-left: 8px;
+    }
+    .drop-zone {
+      margin: 1.8rem 0 1.2rem;
+      padding: 3rem 1.5rem;
+      border: 2px dashed #30363d;
+      border-radius: 16px;
+      text-align: center;
+      background: #161b22;
+      transition: 0.2s;
+      cursor: pointer;
+    }
+    .drop-zone.dragover {
+      border-color: #58a6ff;
+      background: #1c2333;
+    }
+    .drop-zone p {
+      font-size: 1.1rem;
+      color: #8b949e;
+    }
+    .drop-zone .hint {
+      font-size: 0.85rem;
+      color: #484f58;
+      margin-top: 8px;
+    }
+    #fileInput {
+      display: none;
+    }
+    .file-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+      margin: 12px 0 16px;
+    }
+    .file-tag {
+      background: #21262d;
+      padding: 4px 14px 4px 10px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid #30363d;
+    }
+    .file-tag .size {
+      color: #8b949e;
+      font-size: 0.7rem;
+    }
+    .file-tag .remove {
+      cursor: pointer;
+      color: #f85149;
+      font-weight: 700;
+      margin-left: 4px;
+    }
+    .progress-wrap {
+      margin: 16px 0 20px;
+      background: #21262d;
+      border-radius: 8px;
+      height: 8px;
+      overflow: hidden;
+      width: 100%;
+    }
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #58a6ff, #1f6feb);
+      border-radius: 8px;
+      transition: width 0.2s ease;
+    }
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px 28px;
+      margin: 8px 0 20px;
+      font-size: 0.9rem;
+      color: #8b949e;
+    }
+    .stats span strong {
+      color: #f0f6fc;
+      font-weight: 500;
+    }
+    .tab-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      border-bottom: 1px solid #30363d;
+      padding-bottom: 2px;
+      margin: 16px 0 0;
+    }
+    .tab-btn {
+      background: transparent;
+      border: none;
+      color: #8b949e;
+      padding: 8px 18px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border-radius: 6px 6px 0 0;
+      transition: 0.15s;
+      font-weight: 500;
+    }
+    .tab-btn:hover {
+      background: #21262d;
+      color: #e6edf3;
+    }
+    .tab-btn.active {
+      background: #21262d;
+      color: #f0f6fc;
+      border-bottom: 2px solid #58a6ff;
+    }
+    .tab-content {
+      display: none;
+      padding: 16px 0 8px;
+      max-height: 520px;
+      overflow-y: auto;
+      border: 1px solid #21262d;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      background: #0d1117;
+      padding: 12px 8px;
+      margin-bottom: 16px;
+    }
+    .tab-content.active {
+      display: block;
+    }
+    .tab-content .item {
+      padding: 2px 8px;
+      font-family: 'JetBrains Mono', 'Fira Code', monospace;
+      font-size: 0.82rem;
+      word-break: break-all;
+      border-bottom: 1px solid #161b22;
+      color: #d2d8e0;
+    }
+    .tab-content .item:nth-child(even) {
+      background: #0d1117;
+    }
+    .load-more-btn {
+      display: block;
+      margin: 12px auto 4px;
+      background: #21262d;
+      border: 1px solid #30363d;
+      color: #c9d1d9;
+      padding: 6px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: 0.15s;
+    }
+    .load-more-btn:hover {
+      background: #30363d;
+    }
+    .export-bar {
+      display: flex;
+      gap: 12px;
+      margin: 8px 0 12px;
+      flex-wrap: wrap;
+    }
+    .export-btn {
+      background: #21262d;
+      border: 1px solid #30363d;
+      color: #c9d1d9;
+      padding: 6px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: 0.15s;
+    }
+    .export-btn:hover {
+      background: #30363d;
+      border-color: #58a6ff;
+    }
+    .status-msg {
+      color: #8b949e;
+      font-size: 0.9rem;
+      padding: 6px 0;
+    }
+    .badge {
+      background: #1f6feb;
+      padding: 0 10px;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #fff;
+      margin-left: 6px;
+    }
+    @media (max-width: 600px) {
+      body {
+        padding: 1rem;
+      }
+      .tab-btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>
+      🧩 JS Bundle Analyzer
+      <small>extract domains, URLs, emails, JWTs, secrets, endpoints</small>
+    </h1>
+
+    <div class="drop-zone" id="dropZone">
+      <p>📁 Drop your JS bundles here, or click to select</p>
+      <div class="hint">Supports multiple files · large files (20MB+)</div>
+      <input type="file" id="fileInput" multiple accept=".js,.ts,.mjs,.cjs,.json,.txt" />
+    </div>
+
+    <div class="file-list" id="fileList"></div>
+
+    <div class="progress-wrap">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="stats" id="stats">
+      <span>📦 Files: <strong id="fileCount">0</strong></span>
+      <span>📊 Domains: <strong id="statDomains">0</strong></span>
+      <span>🔗 URLs: <strong id="statUrls">0</strong></span>
+      <span>📍 Endpoints: <strong id="statEndpoints">0</strong></span>
+      <span>✉️ Emails: <strong id="statEmails">0</strong></span>
+      <span>🔑 JWTs: <strong id="statJwts">0</strong></span>
+      <span>🕵️ Secrets: <strong id="statSecrets">0</strong></span>
+    </div>
+
+    <div class="export-bar">
+      <button class="export-btn" id="exportJson">📥 Export JSON</button>
+      <button class="export-btn" id="exportTxt">📥 Export TXT</button>
+      <span class="status-msg" id="statusMsg">Ready</span>
+    </div>
+
+    <div class="tab-bar" id="tabBar">
+      <button class="tab-btn active" data-tab="domains">Domains <span class="badge" id="badgeDomains">0</span></button>
+      <button class="tab-btn" data-tab="urls">URLs <span class="badge" id="badgeUrls">0</span></button>
+      <button class="tab-btn" data-tab="endpoints">Endpoints <span class="badge" id="badgeEndpoints">0</span></button>
+      <button class="tab-btn" data-tab="emails">Emails <span class="badge" id="badgeEmails">0</span></button>
+      <button class="tab-btn" data-tab="jwts">JWTs <span class="badge" id="badgeJwts">0</span></button>
+      <button class="tab-btn" data-tab="secrets">Secrets <span class="badge" id="badgeSecrets">0</span></button>
+    </div>
+
+    <div id="tabContents">
+      <div class="tab-content active" id="tab-domains"><div class="status-msg">No data yet</div></div>
+      <div class="tab-content" id="tab-urls"><div class="status-msg">No data yet</div></div>
+      <div class="tab-content" id="tab-endpoints"><div class="status-msg">No data yet</div></div>
+      <div class="tab-content" id="tab-emails"><div class="status-msg">No data yet</div></div>
+      <div class="tab-content" id="tab-jwts"><div class="status-msg">No data yet</div></div>
+      <div class="tab-content" id="tab-secrets"><div class="status-msg">No data yet</div></div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // ----- state -----
+      const results = {
+        domains: new Set(),
+        urls: new Set(),
+        endpoints: new Set(),
+        emails: new Set(),
+        jwts: new Set(),
+        secrets: new Set(),
+      };
+      const fileNames = [];
+      let totalFiles = 0;
+      let processedFiles = 0;
+      let isProcessing = false;
+
+      // UI refs
+      const dropZone = document.getElementById('dropZone');
+      const fileInput = document.getElementById('fileInput');
+      const fileListEl = document.getElementById('fileList');
+      const progressBar = document.getElementById('progressBar');
+      const statusMsg = document.getElementById('statusMsg');
+      const statEls = {
+        domains: document.getElementById('statDomains'),
+        urls: document.getElementById('statUrls'),
+        endpoints: document.getElementById('statEndpoints'),
+        emails: document.getElementById('statEmails'),
+        jwts: document.getElementById('statJwts'),
+        secrets: document.getElementById('statSecrets'),
+      };
+      const badgeEls = {
+        domains: document.getElementById('badgeDomains'),
+        urls: document.getElementById('badgeUrls'),
+        endpoints: document.getElementById('badgeEndpoints'),
+        emails: document.getElementById('badgeEmails'),
+        jwts: document.getElementById('badgeJwts'),
+        secrets: document.getElementById('badgeSecrets'),
+      };
+      const fileCountEl = document.getElementById('fileCount');
+
+      // Tab contents
+      const tabContents = {};
+      document.querySelectorAll('.tab-content').forEach(el => {
+        const id = el.id.replace('tab-', '');
+        tabContents[id] = el;
+      });
+
+      // ----- worker management -----
+      let worker = null;
+      let currentChunkIndex = 0;
+      let totalChunks = 0;
+      let currentFileIndex = 0;
+      let fileQueue = [];
+
+      function createWorker() {
+        if (worker) {
+          worker.terminate();
+        }
+        worker = new Worker('worker.js');
+        worker.onmessage = handleWorkerMessage;
+        worker.onerror = (err) => {
+          statusMsg.textContent = '⚠️ Worker error: ' + err.message;
+          isProcessing = false;
+        };
+      }
+
+      function handleWorkerMessage(e) {
+        const msg = e.data;
+        switch (msg.type) {
+          case 'progress': {
+            const pct = Math.min(100, Math.round(msg.progress));
+            progressBar.style.width = pct + '%';
+            statusMsg.textContent = `⏳ Processing ${msg.file || ''} ... ${pct}%`;
+            break;
+          }
+          case 'partial': {
+            // merge partial results
+            for (const key of ['domains','urls','endpoints','emails','jwts','secrets']) {
+              if (msg[key]) {
+                for (const item of msg[key]) {
+                  results[key].add(item);
+                }
+              }
+            }
+            updateStatsAndBadges();
+            break;
+          }
+          case 'complete': {
+            // final merge for this file
+            for (const key of ['domains','urls','endpoints','emails','jwts','secrets']) {
+              if (msg[key]) {
+                for (const item of msg[key]) {
+                  results[key].add(item);
+                }
+              }
+            }
+            processedFiles++;
+            updateStatsAndBadges();
+            updateFileList();
+            // process next file in queue
+            currentFileIndex++;
+            if (currentFileIndex < fileQueue.length) {
+              processNextFile();
+            } else {
+              isProcessing = false;
+              progressBar.style.width = '100%';
+              statusMsg.textContent = '✅ Done! All files processed.';
+              renderAllTabs();
+            }
+            break;
+          }
+          default: break;
+        }
+      }
+
+      function processNextFile() {
+        if (currentFileIndex >= fileQueue.length) {
+          return;
+        }
+        const file = fileQueue[currentFileIndex];
+        totalChunks = Math.ceil(file.size / (1024 * 1024));
+        currentChunkIndex = 0;
+        statusMsg.textContent = `⏳ Starting ${file.name} ...`;
+        // send start signal
+        worker.postMessage({ type: 'start', fileName: file.name });
+        readNextChunk(file);
+      }
+
+      function readNextChunk(file) {
+        if (currentChunkIndex >= totalChunks) {
+          worker.postMessage({ type: 'end' });
+          return;
+        }
+        const chunkSize = 1024 * 1024; // 1 MB
+        const start = currentChunkIndex * chunkSize;
+        const end = Math.min(start + chunkSize, file.size);
+        const blob = file.slice(start, end);
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+          const buffer = ev.target.result;
+          worker.postMessage({
+            type: 'chunk',
+            data: buffer,
+            index: currentChunkIndex,
+            total: totalChunks,
+            fileName: file.name,
+          });
+          currentChunkIndex++;
+          // read next chunk after a short delay to allow UI updates
+          setTimeout(() => readNextChunk(file), 0);
+        };
+        reader.onerror = () => {
+          statusMsg.textContent = '⚠️ Error reading file chunk';
+        };
+        reader.readAsArrayBuffer(blob);
+      }
+
+      // ----- file handling -----
+      function handleFiles(files) {
+        if (isProcessing) {
+          statusMsg.textContent = '⏳ Already processing, please wait.';
+          return;
+        }
+        if (!files.length) return;
+
+        // reset if first files
+        if (fileQueue.length === 0 && processedFiles === 0) {
+          for (const key of Object.keys(results)) {
+            results[key].clear();
+          }
+          renderAllTabs();
+        }
+
+        for (const file of files) {
+          fileQueue.push(file);
+          fileNames.push(file.name);
+        }
+        totalFiles = fileQueue.length;
+        updateFileList();
+        if (!isProcessing) {
+          isProcessing = true;
+          createWorker();
+          currentFileIndex = 0;
+          processedFiles = 0;
+          processNextFile();
+        }
+      }
+
+      // ----- UI updates -----
+      function updateStatsAndBadges() {
+        for (const key of ['domains','urls','endpoints','emails','jwts','secrets']) {
+          const count = results[key].size;
+          if (statEls[key]) statEls[key].textContent = count;
+          if (badgeEls[key]) badgeEls[key].textContent = count;
+        }
+        fileCountEl.textContent = processedFiles + '/' + fileQueue.length;
+      }
+
+      function updateFileList() {
+        fileListEl.innerHTML = '';
+        for (let i = 0; i < fileQueue.length; i++) {
+          const f = fileQueue[i];
+          const tag = document.createElement('span');
+          tag.className = 'file-tag';
+          const done = i < processedFiles ? '✅' : '⏳';
+          tag.innerHTML = `${done} ${f.name} <span class="size">(${(f.size/1024).toFixed(1)} KB)</span> <span class="remove" data-idx="${i}">✕</span>`;
+          tag.querySelector('.remove').addEventListener('click', (e) => {
+            e.stopPropagation();
+            const idx = parseInt(e.target.dataset.idx);
+            if (!isProcessing && idx < fileQueue.length) {
+              fileQueue.splice(idx, 1);
+              fileNames.splice(idx, 1);
+              updateFileList();
+            }
+          });
+          fileListEl.appendChild(tag);
+        }
+        fileCountEl.textContent = processedFiles + '/' + fileQueue.length;
+      }
+
+      function renderTab(tabName) {
+        const container = tabContents[tabName];
+        if (!container) return;
+        const items = Array.from(results[tabName] || []);
+        if (items.length === 0) {
+          container.innerHTML = '<div class="status-msg">No items found</div>';
+          return;
+        }
+        // Show first 5000, add "load more" if needed
+        const limit = 5000;
+        const showItems = items.slice(0, limit);
+        let html = '';
+        for (const item of showItems) {
+          html += `<div class="item">${escapeHtml(item)}</div>`;
+        }
+        container.innerHTML = html;
+        if (items.length > limit) {
+          const btn = document.createElement('button');
+          btn.className = 'load-more-btn';
+          btn.textContent = `Load ${items.length - limit} more ...`;
+          btn.addEventListener('click', () => {
+            const remaining = items.slice(limit);
+            let extraHtml = '';
+            for (const item of remaining) {
+              extraHtml += `<div class="item">${escapeHtml(item)}</div>`;
+            }
+            container.insertAdjacentHTML('beforeend', extraHtml);
+            btn.remove();
+          });
+          container.appendChild(btn);
+        }
+      }
+
+      function renderAllTabs() {
+        for (const key of Object.keys(results)) {
+          renderTab(key);
+        }
+      }
+
+      function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+      }
+
+      // ----- tab switching -----
+      document.getElementById('tabBar').addEventListener('click', (e) => {
+        const btn = e.target.closest('.tab-btn');
+        if (!btn) return;
+        const tab = btn.dataset.tab;
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        const target = document.getElementById('tab-' + tab);
+        if (target) {
+          target.classList.add('active');
+          renderTab(tab);
+        }
+      });
+
+      // ----- export -----
+      function getExportData() {
+        const data = {};
+        for (const key of Object.keys(results)) {
+          data[key] = Array.from(results[key]).sort();
+        }
+        return data;
+      }
+
+      document.getElementById('exportJson').addEventListener('click', () => {
+        const data = getExportData();
+        const json = JSON.stringify(data, null, 2);
+        downloadFile(json, 'analysis.json', 'application/json');
+      });
+
+      document.getElementById('exportTxt').addEventListener('click', () => {
+        const data = getExportData();
+        let txt = '';
+        for (const [key, items] of Object.entries(data)) {
+          txt += `--- ${key.toUpperCase()} (${items.length}) ---\n`;
+          txt += items.join('\n') + '\n\n';
+        }
+        downloadFile(txt, 'analysis.txt', 'text/plain');
+      });
+
+      function downloadFile(content, filename, mime) {
+        const blob = new Blob([content], { type: mime });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      // ----- drag & drop -----
+      dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+      });
+      dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+      });
+      dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
+          handleFiles(e.dataTransfer.files);
+        }
+      });
+      dropZone.addEventListener('click', () => {
+        fileInput.click();
+      });
+      fileInput.addEventListener('change', () => {
+        if (fileInput.files.length) {
+          handleFiles(fileInput.files);
+          fileInput.value = '';
+        }
+      });
+
+      // initial state
+      updateStatsAndBadges();
+      renderAllTabs();
+    })();
+  </script>
+</body>
+</html>

